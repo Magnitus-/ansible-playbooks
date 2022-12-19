@@ -1,0 +1,37 @@
+- name: Download Minio
+  get_url:
+    url: https://dl.min.io/server/minio/release/linux-amd64/archive/minio.RELEASE.2022-12-12T19-27-27Z
+    dest: /bin/minio
+    mode: 0555
+- name: Get sha256 Sum of Minio Download
+  stat:
+    path: /bin/minio
+    checksum_algorithm: sha256
+    get_checksum: yes
+  register: minio_bin_stat
+- name: Verify Minio Checksum Match Expected Value
+  fail:
+    msg: "Failure: minio download doesn't have expected checksum."
+  when: minio_bin_stat.stat.checksum != 'cbb59260d85bb409467aebcb332053ebc0ad3dcea1e3385565851d32256baf44'
+- name: Ensure Data Directory Exists
+  ansible.builtin.file:
+    path: "{{ minio_data_directory }}"
+    owner: "{{ minio_os_user }}"
+    group: "{{ minio_os_group }}"
+    mode: 0640
+    state: directory
+- name: Copy Systemd Service File
+  template:
+    src: minio.service.j2
+    dest: "/etc/systemd/system/minio.service"
+    owner: root
+    group: root
+    mode: 0640
+- name: Ensure Systemd Has Reloaded Configs
+  ansible.builtin.systemd:
+    daemon_reload: yes
+- name: Start the Service, If It Isn't Already Running
+  ansible.builtin.systemd:
+    enabled: yes
+    state: started
+    name: minio.service

@@ -1,0 +1,4 @@
+- name: Setup Minio
+  hosts: all
+  roles:
+    - { role: ../roles/minio, become: true }

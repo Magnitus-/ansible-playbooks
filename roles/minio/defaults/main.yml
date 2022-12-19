@@ -1,0 +1,7 @@
+---
+minio_region: "regionone"
+minio_os_user: "root"
+minio_os_group: "root"
+minio_bind_ip: "0.0.0.0"
+minio_bind_port: 9000
+minio_data_directory: /var/lib/minio
