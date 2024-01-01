@@ -1,0 +1,26 @@
+{% for coredns_domain in coredns_domains %}
+{{ coredns_domain.domain }}:{{ coredns_port }} {
+    bind {{ coredns_bind_ip }}
+    auto {
+        directory /etc/coredns/zonefiles/{{ coredns_domain.domain }} (.*) {1}
+        reload 5s
+    }
+    reload 5s
+    loop
+    nsid coredns
+    errors
+    log
+}
+
+{% endfor %}
+.:{{ coredns_port }} {
+    bind {{ coredns_bind_ip }}
+    forward . {{ coredns_forward_servers | join(' ') }} {
+       policy {{ coredns_forward_policy }} 
+    }
+    reload 5s
+    loop
+    nsid coredns
+    errors
+    log
+}

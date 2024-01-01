@@ -1,0 +1,36 @@
+$ORIGIN {{ zonefile.domain }}.
+$TTL {{ zonefile.cache_ttl }}
+@	IN	SOA {{ zonefile.dns_server_name }} {{ zonefile.email }} (
+				{{ ansible_date_time.epoch }} ; serial
+				7200                          ; refresh (2 hours), only affects secondary dns servers
+				3600                          ; retry (1 hour), only affects secondary dns servers
+				604800                        ; expire (1 week), only affects secondary dns servers
+				{{ zonefile.cache_ttl }}      ;
+				)
+{% for ns_record in zonefile.ns_records %}
+{{ ns_record.prefix }} IN NS {{ ns_record.nameserver }}
+{% endfor %}
+
+{% for a_record in zonefile.a_records %}
+{% if a_record.prefix != "" %}
+{{ a_record.prefix }} IN A {{ a_record.ip }}
+{% else %}
+@ IN A {{ a_record.ip }}
+{% endif %}
+{% endfor %}
+
+{% for mx_record in zonefile.mx_records %}
+{% if mx_record.prefix != "" %}
+{{ mx_record.prefix }} IN MX {{ mx_record.priority }} {{ mx_record.address }}
+{% else %}
+@ IN MX {{ mx_record.priority }} {{ mx_record.address }}
+{% endif %}
+{% endfor %}
+
+{% for txt_record in zonefile.txt_records %}
+{% if txt_record.prefix != "" %}
+{{ txt_record.prefix }} IN TXT "{{ txt_record.text }}"
+{% else %}
+@ IN TXT "{{ txt_record.text }}"
+{% endif %}
+{% endfor %}

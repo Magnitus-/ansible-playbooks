@@ -1,0 +1,4 @@
+- name: Setup Coredns
+  hosts: all
+  roles:
+    - { role: ../roles/coredns, become: true }

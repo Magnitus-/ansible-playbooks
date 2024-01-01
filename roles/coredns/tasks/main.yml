@@ -1,0 +1,113 @@
+- name: Create Coredns User
+  ansible.builtin.user:
+    name: coredns
+    system: yes
+    password_lock: yes
+- name: Download Coredns on Amd64
+  get_url:
+    url: https://github.com/coredns/coredns/releases/download/v1.11.1/coredns_1.11.1_linux_amd64.tgz
+    dest: /opt/coredns.tgz
+    mode: 0555
+  when: ansible_architecture == "x86_64"
+- name: Download Coredns on Arm64
+  get_url:
+    url: https://github.com/coredns/coredns/releases/download/v1.11.1/coredns_1.11.1_linux_arm64.tgz
+    dest: /opt/coredns.tgz
+    mode: 0555
+  when: ansible_architecture == "aarch64"
+- name: Get sha256 Sum of Coredns Download
+  stat:
+    path: /opt/coredns.tgz
+    checksum_algorithm: sha256
+    get_checksum: yes
+  register: coredns_tgz_stat
+- name: Verify Coredns Checksum Match Expected Value on Amd64
+  fail:
+    msg: "Failure: coredns download doesn't have expected checksum."
+  when: ansible_architecture == "x86_64" and coredns_tgz_stat.stat.checksum != 'f96cdee0934c5c12a28bb0fb080bed688fdd7bfdeae2f64984f02bdec2d65498'
+- name: Verify Coredns Checksum Match Expected Value on Arm64
+  fail:
+    msg: "Failure: coredns download doesn't have expected checksum."
+  when: ansible_architecture == "aarch64" and coredns_tgz_stat.stat.checksum != '725ee697b45fff0c77d63b931977090aa0e93a617a782eac1bc4a996ce0248e2'
+- name: Create Coredns Untar Directory
+  ansible.builtin.file:
+    path: /opt/coredns
+    state: directory
+- name: Extract Coredns From Tar Archive
+  ansible.builtin.unarchive:
+    src: /opt/coredns.tgz
+    dest: /opt/coredns
+    remote_src: yes
+- name: Copy Coredns Binary
+  ansible.builtin.copy:
+    src: /opt/coredns/coredns
+    dest: /usr/local/bin/coredns
+    owner: root
+    group: root
+    mode: '0555'
+    remote_src: yes
+- name: Give Coredns Binary Permission to Bind on Privileged Ports
+  shell: setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/coredns
+- name: Delete Coredns Downloaded Artifact
+  ansible.builtin.file:
+    path: /opt/coredns.tgz
+    state: absent
+- name: Delete Coredns Unzip Directory
+  ansible.builtin.file:
+    path: /opt/coredns
+    state: absent
+- name: Ensure Coredns Configuration Directory Exists
+  ansible.builtin.file:
+    path: /etc/coredns
+    owner: coredns
+    group: coredns
+    mode: 0700
+    state: directory
+- name: Ensure Coredns Zonefiles Directory Exists
+  ansible.builtin.file:
+    path: /etc/coredns/zonefiles
+    owner: coredns
+    group: coredns
+    mode: 0700
+    state: directory
+- name: Ensure Coredns Zonefiles Domains Directories Exists
+  ansible.builtin.file:
+    path: "/etc/coredns/zonefiles/{{ item.domain }}"
+    owner: coredns
+    group: coredns
+    mode: 0700
+    state: directory
+  loop: "{{ coredns_domains }}"
+- name: Generate Zonefiles
+  template:
+    src: zonefile.j2
+    dest: "/etc/coredns/zonefiles/{{ item.0.domain }}/{{ item.1.domain }}"
+    owner: coredns
+    group: coredns
+    mode: 0600
+  vars:
+    zonefile: "{{ item.1 }}"
+  with_subelements:
+    - "{{ coredns_domains }}"
+    - zonefiles
+- name: Generate Coredns Corefile
+  template:
+    src: Corefile.j2
+    dest: /etc/coredns/Corefile
+    owner: coredns
+    group: coredns
+    mode: 0600
+- name: Copy Service Unit File
+  copy:
+    src: coredns.service
+    dest: /etc/systemd/system/coredns.service
+    owner: "root"
+    mode: 0640
+- name: Ensure Systemd Has Reloaded Configs
+  ansible.builtin.systemd:
+    daemon_reload: yes
+- name: Start the Coredns Service, If It Isn't Already Running
+  ansible.builtin.systemd:
+    enabled: yes
+    state: started
+    name: coredns.service

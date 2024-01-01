@@ -1,0 +1,4 @@
+---
+coredns_bind_ip: "0.0.0.0"
+coredns_port: 53
+coredns_forward_policy: sequential
