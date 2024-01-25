@@ -1,0 +1,4 @@
+- name: Install podman
+  ansible.builtin.apt:
+    name: podman
+    update_cache: yes

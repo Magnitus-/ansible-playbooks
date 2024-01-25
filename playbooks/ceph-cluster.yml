@@ -1,0 +1,12 @@
+- name: Setup Ceph Core Dependencies
+  hosts: ceph
+  roles:
+    - { role: ../roles/ceph/core, become: true }
+- name: Install cephadm on admin nodes
+  hosts: admin
+  roles:
+    - { role: ../roles/ceph/cephadm, become: true }
+- name: Setup Secrets
+  hosts: admin
+  roles:
+    - { role: ../roles/ceph/secrets, become: true }

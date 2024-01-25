@@ -1,0 +1,24 @@
+- name: Check if Cephadm Exists
+  ansible.builtin.command: which cephadm
+  failed_when: cephadm_which.rc not in [0,1]
+  register: cephadm_which
+- name: Get Cephadm Binary 
+  ansible.builtin.get_url:
+    url: https://download.ceph.com/rpm-18.2.1/el9/noarch/cephadm
+    dest: /tmp/cephadm
+    mode: '0550'
+  when: cephadm_which.rc not in [ 0 ]
+- name: Add Reef Release
+  ansible.builtin.command: /tmp/cephadm add-repo --release reef
+  when: cephadm_which.rc not in [ 0 ]
+- name: Install Cephadm
+  ansible.builtin.command: /tmp/cephadm install
+  when: cephadm_which.rc not in [ 0 ]
+- name: Remove downloaded cephadm binary
+  ansible.builtin.file:
+    path: /tmp/cephadm
+    state: absent
+  when: cephadm_which.rc not in [ 0 ]
+- name: Install Ceph Common
+  ansible.builtin.command: cephadm install ceph-common
+  when: cephadm_which.rc not in [ 0 ]
