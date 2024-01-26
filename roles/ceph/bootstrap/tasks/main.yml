@@ -1,0 +1,21 @@
+- name: Check if Admin Keyring Exists
+  stat: 
+    path: /etc/ceph/ceph.client.admin.keyring
+  register: admin_keyring
+- name: Generate Boostrap Script
+  template:
+    src: bootstrap.sh.j2
+    dest: /opt/bootstrap.sh
+    mode: 0700
+  when: admin_keyring.stat.exists == false
+- name: Run Boostrap Script
+  ansible.builtin.command: /opt/bootstrap.sh
+  register: bootstrap_out
+  when: admin_keyring.stat.exists == false
+- debug: var=bootstrap_out.stdout_lines
+  when: admin_keyring.stat.exists == false
+- name: Remove Boostrap Script
+  ansible.builtin.file:
+    path: /opt/bootstrap.sh
+    state: absent
+  when: admin_keyring.stat.exists == false

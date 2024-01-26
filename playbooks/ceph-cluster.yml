@@ -10,3 +10,7 @@
   hosts: admin
   roles:
     - { role: ../roles/ceph/secrets, become: true }
+- name: Bootstrap First Node
+  hosts: admin[0]
+  roles:
+    - { role: ../roles/ceph/bootstrap, become: true }

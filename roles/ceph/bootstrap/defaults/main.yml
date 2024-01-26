@@ -1,0 +1,4 @@
+---
+ceph_ssh_user: "{{ ansible_user }}"
+ceph_public_ip: "{{ ansible_host }}"
+cluster_network: ""

@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+cephadm bootstrap --mon-ip {{ ceph_public_ip }} \
+{% if cluster_network is defined and cluster_network|length -%}
+                --cluster-network "{{ cluster_network }}" \
+{% endif %}
+                --allow-fqdn-hostname \
+                --ssh-user {{ ceph_ssh_user }} \
+                --dashboard-key /opt/ceph/tls/server.key \
+                --dashboard-crt /opt/ceph/tls/server.crt \
+                --ssh-private-key /opt/ceph/ssh/ssh_key \
+                --ssh-public-key /opt/ceph/ssh/ssh_key.pub
+ceph orch host add $(hostname) --labels=mon
+ceph orch host add $(hostname) --labels=mgr
