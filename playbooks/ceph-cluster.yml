@@ -1,7 +1,7 @@
 - name: Setup Ceph Core Dependencies
   hosts: ceph
   roles:
-    - { role: ../roles/ceph/core, become: true }
+    - { role: ../roles/ceph/dependencies, become: true }
 - name: Install cephadm on admin nodes
   hosts: admin
   roles:
