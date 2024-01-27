@@ -1,0 +1,43 @@
+---
+service_type: mon
+service_name: mon
+placement:
+  count: 3
+  label: "mon"
+---
+service_type: mgr
+service_name: mgr
+networks:
+  - "{{ public_network }}"
+placement:
+  count: 2
+  label: "mgr"
+---
+service_type: prometheus
+service_name: prometheus
+placement:
+  label: "metrics"
+spec:
+  retention_time: "{{ prom_retention_time }}"
+{% if prom_retention_size is defined and prom_retention_size|length %}
+  retention_size: "{{ prom_retention_size }}"
+{% endif %}
+---
+service_type: grafana
+service_name: grafana
+placement:
+  label: "metrics"
+spec:
+{% if grafana_admin_password is defined and grafana_admin_password|length %}
+  initial_admin_password: "{{ grafana_admin_password }}"
+{% endif %}
+{% if grafana_anonymous_access is defined and grafana_anonymous_access == false %}
+  anonymous_access: False
+{% else %}
+  anonymous_access: True
+{% endif %}
+---
+service_type: alertmanager
+service_name: alertmanager
+placement:
+  label: "metrics"

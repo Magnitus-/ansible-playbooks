@@ -1,0 +1,7 @@
+---
+prom_retention_time: "15d"
+prom_retention_size: ""
+grafana_admin_password: ""
+grafana_anonymous_access: true
+redeploy_metrics_services: false
+metrics_hostnames: []

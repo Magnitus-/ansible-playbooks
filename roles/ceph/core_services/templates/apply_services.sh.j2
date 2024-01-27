@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+{% for hostname in metrics_hostnames %}
+ceph config-key set mgr/cephadm/{{ hostname }}/grafana_key -i /opt/ceph/tls/server.key
+ceph config-key set mgr/cephadm/{{ hostname }}/grafana_crt -i /opt/ceph/tls/server.crt
+{% endfor %}
+ceph orch apply -i /opt/ceph_services.yml
+ceph orch reconfig grafana
+{% if redeploy_metrics_services is defined and redeploy_metrics_services == true -%}
+ceph orch redeploy grafana
+ceph orch redeploy prometheus
+{% endif %}

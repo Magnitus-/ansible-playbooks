@@ -1,0 +1,22 @@
+- name: Generate Services Manifest
+  template:
+    src: services.yml.j2
+    dest: /opt/ceph_services.yml
+    mode: 0700
+- name: Generate Execution Script
+  template:
+    src: apply_services.sh.j2
+    dest: /opt/ceph_apply_services.sh
+    mode: 0700
+- name: Run Execution Script
+  ansible.builtin.command: /opt/ceph_apply_services.sh
+  register: apply_out
+- debug: var=apply_out.stdout_lines
+- name: Remove Services Manifest
+  ansible.builtin.file:
+    path: /opt/ceph_services.yml
+    state: absent
+- name: Remove Execution Script
+  ansible.builtin.file:
+    path: /opt/ceph_apply_services.sh
+    state: absent

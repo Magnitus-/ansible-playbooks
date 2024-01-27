@@ -14,3 +14,9 @@
   hosts: admin[0]
   roles:
     - { role: ../roles/ceph/bootstrap, become: true }
+- name: Setup Core Services
+  hosts: admin[0]
+  vars:
+    metrics_hostnames: "{{ groups['metrics'] | map('extract', hostvars) | map(attribute='ansible_nodename') }}"
+  roles:
+    - { role: ../roles/ceph/core_services, become: true }
