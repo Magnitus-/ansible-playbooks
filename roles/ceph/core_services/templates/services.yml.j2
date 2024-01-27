@@ -16,6 +16,7 @@ placement:
 service_type: prometheus
 service_name: prometheus
 placement:
+  count: 2
   label: "metrics"
 spec:
   retention_time: "{{ prom_retention_time }}"
@@ -26,6 +27,7 @@ spec:
 service_type: grafana
 service_name: grafana
 placement:
+  count: 2
   label: "metrics"
 spec:
 {% if grafana_admin_password is defined and grafana_admin_password|length %}
@@ -40,4 +42,5 @@ spec:
 service_type: alertmanager
 service_name: alertmanager
 placement:
+  count: 2
   label: "metrics"

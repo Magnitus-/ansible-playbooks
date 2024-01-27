@@ -20,3 +20,12 @@
   ansible.builtin.file:
     path: /opt/ceph_apply_services.sh
     state: absent
+- name: Check If Osd Service Exists
+  ansible.builtin.shell: ceph orch ls | grep osd.all-available-devices
+  register: osd_service_exists
+- name: Set Osd Service
+  ansible.builtin.command: ceph orch apply osd --all-available-devices
+  register: set_osd_service
+  when: '"osd.all-available-devices" not in osd_service_exists.stdout'
+- debug: var=set_osd_service.stdout_lines
+  when: '"osd.all-available-devices" not in osd_service_exists.stdout'

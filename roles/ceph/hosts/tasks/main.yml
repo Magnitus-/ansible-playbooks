@@ -1,0 +1,13 @@
+- name: Generate Hosts Manifest
+  template:
+    src: hosts.yml.j2
+    dest: /opt/ceph_hosts.yml
+    mode: 0700
+- name: Set hosts
+  ansible.builtin.command: ceph orch apply -i /opt/ceph_hosts.yml
+  register: set_hosts_out
+- debug: var=set_hosts_out.stdout_lines
+- name: Remove Hosts Manifest
+  ansible.builtin.file:
+    path: /opt/ceph_hosts.yml
+    state: absent
