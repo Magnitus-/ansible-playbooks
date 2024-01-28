@@ -1,0 +1,22 @@
+- name: Generate Rgw Services Manifest
+  template:
+    src: rgw_services.yml.j2
+    dest: /opt/rgw_services.yml
+    mode: 0700
+- name: Generate Rgw Setup Script
+  template:
+    src: setup_rgw_service.sh.j2
+    dest: /opt/setup_rgw_service.sh
+    mode: 0700
+- name: Run Setup Script
+  ansible.builtin.command: /opt/setup_rgw_service.sh
+  register: setup_out
+- debug: var=setup_out.stdout_lines
+- name: Remove Rgw Services Manifest
+  ansible.builtin.file:
+    path: /opt/rgw_services.yml
+    state: absent
+- name: Remove Rgw Setup Script
+  ansible.builtin.file:
+    path: /opt/setup_rgw_service.sh
+    state: absent

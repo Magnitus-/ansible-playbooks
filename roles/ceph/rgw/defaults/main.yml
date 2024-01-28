@@ -1,0 +1,9 @@
+---
+rgw_zone: "local"
+rgw_ingress_frontend_port: 4443
+rgw_ingress_monitor_port: 1967
+server_cert: "server.crt"
+server_key: "server.key"
+default_erasure_code_k: 3
+default_erasure_code_m: 2
+default_compression_algorithm: lz4

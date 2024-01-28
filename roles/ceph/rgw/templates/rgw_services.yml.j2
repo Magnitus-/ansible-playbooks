@@ -1,0 +1,24 @@
+---
+service_type: rgw
+service_id: {{ rgw_zone }}
+placement:
+  label: rgw
+  count_per_host: 1
+spec:
+  rgw_frontend_type: "beast"
+  rgw_frontend_port: 8080
+---
+service_type: ingress
+service_id: rgw.{{ rgw_zone }}
+placement:
+  label: rgw
+  count: 3
+backend_service: rgw.{{ rgw_zone }}
+virtual_ip: "{{ rgw_ingress_ip }}"
+frontend_port: {{ rgw_ingress_frontend_port }}
+monitor_port: {{ rgw_ingress_monitor_port }}
+virtual_interface_networks:
+  - "{{ public_network }}"
+ssl_cert: |
+{{ lookup('ansible.builtin.file', server_key) | indent( width=2, first=True) }}
+{{ lookup('ansible.builtin.file', server_cert) | indent( width=2, first=True) }}

@@ -24,3 +24,7 @@
   hosts: admin[0]
   roles:
     - { role: ../roles/ceph/hosts, become: true }
+- name: Setup Rgw Service
+  hosts: admin[0]
+  roles:
+    - { role: ../roles/ceph/rgw, become: true }

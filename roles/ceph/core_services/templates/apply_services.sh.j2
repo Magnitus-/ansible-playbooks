@@ -7,6 +7,7 @@ ceph config-key set mgr/cephadm/{{ hostname }}/grafana_key -i /opt/ceph/tls/serv
 ceph config-key set mgr/cephadm/{{ hostname }}/grafana_crt -i /opt/ceph/tls/server.crt
 {% endfor %}
 ceph orch apply -i /opt/ceph_services.yml
+sleep 10
 ceph orch reconfig grafana
 {% if redeploy_metrics_services is defined and redeploy_metrics_services == true -%}
 ceph orch redeploy grafana
