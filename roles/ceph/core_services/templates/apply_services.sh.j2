@@ -7,8 +7,11 @@ ceph config-key set mgr/cephadm/{{ hostname }}/grafana_key -i /opt/ceph/tls/serv
 ceph config-key set mgr/cephadm/{{ hostname }}/grafana_crt -i /opt/ceph/tls/server.crt
 {% endfor %}
 ceph orch apply -i /opt/ceph_services.yml
-sleep 10
-ceph orch reconfig grafana
+
+if [ ! -z "$(ceph orch ls | grep grafana | { grep -v grep || test $? = 1; })" ] && [ -z "$(ceph orch ls | grep grafana | grep "0/" | { grep -v grep || test $? = 1; })" ]; then
+  ceph orch reconfig grafana
+fi
+
 {% if redeploy_metrics_services is defined and redeploy_metrics_services == true -%}
 ceph orch redeploy grafana
 ceph orch redeploy prometheus

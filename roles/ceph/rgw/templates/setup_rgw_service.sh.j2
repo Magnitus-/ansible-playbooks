@@ -2,6 +2,14 @@
 
 set -e
 
+while [ "$(ceph orch device ls | grep No | { grep -v grep || test $? = 1; } | wc -l)" = "0" ]; do
+  sleep 10
+done
+
+while [ "$(ceph orch device ls | grep Yes | { grep -v grep || test $? = 1; } | wc -l)" != "0" ]; do
+  sleep 10
+done
+
 #Control pool
 ceph osd pool create {{ rgw_zone }}.rgw.control 32 32 replicated replicated_rule
 ceph osd pool set {{ rgw_zone }}.rgw.control size 3
@@ -46,7 +54,14 @@ ceph osd pool application enable {{ rgw_zone }}.rgw.buckets.data rgw
 
 #Deploy gateways
 ceph orch apply -i /opt/rgw_services.yml
-sleep 30
+
+while [ -z "$(ceph orch ls | grep rgw.{{ rgw_zone }} | { grep -v grep || test $? = 1; })" ]; do
+  sleep 10
+done
+
+while [ ! -z "$(ceph orch ls | grep rgw.{{ rgw_zone }} | grep "0/" | { grep -v grep || test $? = 1; })" ]; do
+  sleep 10
+done
 
 #Create zone
 radosgw-admin realm create --rgw-realm={{ rgw_zone }} --default
