@@ -3,20 +3,27 @@
 service_type: host
 hostname: {{ host.ansible_nodename }}
 addr: {{ host.ansible_host }}
+{% set is_mon = ((groups['mon'] | map('extract', hostvars) | map(attribute='ansible_host')) is contains(host.ansible_host)) %}
+{% set is_mgr = ((groups['mgr'] | map('extract', hostvars) | map(attribute='ansible_host')) is contains(host.ansible_host)) %}
+{% set is_rgw = ((groups['rgw'] | map('extract', hostvars) | map(attribute='ansible_host')) is contains(host.ansible_host)) %}
+{% set is_admin = ((groups['admin'] | map('extract', hostvars) | map(attribute='ansible_host')) is contains(host.ansible_host)) %}
+{% set is_metric = ((groups['metrics'] | map('extract', hostvars) | map(attribute='ansible_host')) is contains(host.ansible_host)) %}
+{% if is_mon or is_mgr or is_rgw or is_admin or is_metric %}
 labels:
-{% if (groups['mon'] | map('extract', hostvars) | map(attribute='ansible_host')) is contains(host.ansible_host) %}
+{% if is_mon %}
   - mon
 {% endif %}
-{% if (groups['mgr'] | map('extract', hostvars) | map(attribute='ansible_host')) is contains(host.ansible_host) %}
+{% if is_mgr %}
   - mgr
 {% endif %}
-{% if (groups['rgw'] | map('extract', hostvars) | map(attribute='ansible_host')) is contains(host.ansible_host) %}
+{% if is_rgw %}
   - rgw
 {% endif %}
-{% if (groups['admin'] | map('extract', hostvars) | map(attribute='ansible_host')) is contains(host.ansible_host) %}
+{% if is_admin %}
   - _admin
 {% endif %}
-{% if (groups['metrics'] | map('extract', hostvars) | map(attribute='ansible_host')) is contains(host.ansible_host) %}
+{% if is_metric %}
   - metrics
+{% endif %}
 {% endif %}
 {% endfor %}

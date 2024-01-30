@@ -3,7 +3,7 @@
   roles:
     - { role: ../roles/ceph/dependencies, become: true }
 - name: Install cephadm on admin nodes
-  hosts: admin
+  hosts: ceph
   roles:
     - { role: ../roles/ceph/cephadm, become: true }
 - name: Setup Secrets
