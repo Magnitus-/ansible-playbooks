@@ -1,6 +1,6 @@
 ---
 service_type: rgw
-service_id: {{ rgw_zone }}
+service_id: default
 placement:
   label: rgw
   count_per_host: 1
@@ -9,11 +9,11 @@ spec:
   rgw_frontend_port: 8080
 ---
 service_type: ingress
-service_id: rgw.{{ rgw_zone }}
+service_id: rgw.default
 placement:
   label: rgw
   count: 3
-backend_service: rgw.{{ rgw_zone }}
+backend_service: rgw.default
 virtual_ip: "{{ rgw_ingress_ip }}"
 frontend_port: {{ rgw_ingress_frontend_port }}
 monitor_port: {{ rgw_ingress_monitor_port }}
