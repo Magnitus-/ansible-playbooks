@@ -16,3 +16,21 @@ fi
 ceph orch redeploy grafana
 ceph orch redeploy prometheus
 {% endif %}
+
+#In case dashboard certs changed
+CRT_CHECKSUM=$(sha256sum /opt/ceph/tls/server.crt)
+KEY_CHECKSUM=$(sha256sum /opt/ceph/tls/server.key)
+
+if [ ! -f /opt/ceph/tls/server.crt.dashboard.sha256sum ]; then
+  printf "$CRT_CHECKSUM" > /opt/ceph/tls/server.crt.dashboard.sha256sum
+  printf "$KEY_CHECKSUM" > /opt/ceph/tls/server.key.dashboard.sha256sum
+else
+  if [ "$CRT_CHECKSUM" != "$(cat /opt/ceph/tls/server.crt.dashboard.sha256sum)" ] || [ "$KEY_CHECKSUM" != "$(cat /opt/ceph/tls/server.key.dashboard.sha256sum)" ]; then
+    printf "$CRT_CHECKSUM" > /opt/ceph/tls/server.crt.dashboard.sha256sum
+    printf "$KEY_CHECKSUM" > /opt/ceph/tls/server.key.dashboard.sha256sum
+    ceph dashboard set-ssl-certificate -i /opt/ceph/tls/server.crt
+    ceph dashboard set-ssl-certificate-key -i /opt/ceph/tls/server.key
+    ceph mgr module disable dashboard
+    ceph mgr module enable dashboard
+  fi
+fi

@@ -2,31 +2,42 @@
   ansible.builtin.shell: ceph orch ls | grep rgw
   register: rgw_service_exists
   failed_when: rgw_service_exists.rc > 1
+- name: Generate Rgw Pools Setup Script
+  template:
+    src: setup_rgw_pools.sh.j2
+    dest: /opt/setup_rgw_pools.sh
+    mode: 0700
+  when: '"rgw" not in rgw_service_exists.stdout'
+- name: Run Rgw Pools Setup Script
+  ansible.builtin.command: /opt/setup_rgw_pools.sh
+  register: pools_setup_out
+  when: '"rgw" not in rgw_service_exists.stdout'
+- debug: var=pools_setup_out.stdout_lines
+  when: '"rgw" not in rgw_service_exists.stdout'
+- name: Remove Rgw Pools Setup Script
+  ansible.builtin.file:
+    path: /opt/setup_rgw_pools.sh
+    state: absent
+  when: '"rgw" not in rgw_service_exists.stdout'
 - name: Generate Rgw Services Manifest
   template:
     src: rgw_services.yml.j2
     dest: /opt/rgw_services.yml
     mode: 0700
-  when: '"rgw" not in rgw_service_exists.stdout'
-- name: Generate Rgw Setup Script
+- name: Generate Rgw Service Setup Script
   template:
     src: setup_rgw_service.sh.j2
     dest: /opt/setup_rgw_service.sh
     mode: 0700
-  when: '"rgw" not in rgw_service_exists.stdout'
-- name: Run Setup Script
+- name: Run Rgw Service Setup Script
   ansible.builtin.command: /opt/setup_rgw_service.sh
-  register: setup_out
-  when: '"rgw" not in rgw_service_exists.stdout'
-- debug: var=setup_out.stdout_lines
-  when: '"rgw" not in rgw_service_exists.stdout'
+  register: service_setup_out
+- debug: var=service_setup_out.stdout_lines
+- name: Remove Rgw Service Setup Script
+  ansible.builtin.file:
+    path: /opt/setup_rgw_service.sh
+    state: absent
 - name: Remove Rgw Services Manifest
   ansible.builtin.file:
     path: /opt/rgw_services.yml
     state: absent
-  when: '"rgw" not in rgw_service_exists.stdout'
-- name: Remove Rgw Setup Script
-  ansible.builtin.file:
-    path: /opt/setup_rgw_service.sh
-    state: absent
-  when: '"rgw" not in rgw_service_exists.stdout'
