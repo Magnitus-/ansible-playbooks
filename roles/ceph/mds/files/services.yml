@@ -1,0 +1,6 @@
+---
+service_type: mds
+service_id: mds
+placement:
+  label: mds
+  count_per_host: 1

@@ -1,0 +1,34 @@
+#!/bin/sh
+
+set -e
+
+while [ "$(ceph orch device ls | grep No | { grep -v grep || test $? = 1; } | wc -l)" = "0" ]; do
+  sleep 10
+done
+
+while [ "$(ceph orch device ls | grep Yes | { grep -v grep || test $? = 1; } | wc -l)" != "0" ]; do
+  sleep 10
+done
+
+while [ -z "$(ceph orch ls | grep mds | { grep -v grep || test $? = 1; })" ]; do
+  sleep 10
+done
+
+while [ ! -z "$(ceph orch ls | grep mds | grep "0/" | { grep -v grep || test $? = 1; })" ]; do
+  sleep 10
+done
+
+{% for fs in cephfs_fs %}
+if [ -z "$(ceph fs ls | grep 'name: {{ fs.name }},' | { grep -v grep || test $? = 1; })" ]; then
+  ceph osd pool create {{ fs.name }}_data 64 64 replicated replicated_rule
+  ceph osd pool set {{ fs.name }}_data size {{ fs.data_replication }}
+  ceph osd pool set {{ fs.name }}_data min_size {{ fs.data_replication - 1 }}
+
+  ceph osd pool create {{ fs.name }}_metadata 32 32 replicated replicated_rule
+  ceph osd pool set {{ fs.name }}_metadata size {{ fs.metadata_replication }}
+  ceph osd pool set {{ fs.name }}_metadata min_size {{ fs.metadata_replication - 1 }}
+
+  ceph fs new {{ fs.name }} {{ fs.name }}_metadata {{ fs.name }}_data
+fi
+{% endfor %}
+

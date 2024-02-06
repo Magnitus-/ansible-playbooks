@@ -28,3 +28,7 @@
   hosts: admin[0]
   roles:
     - { role: ../roles/ceph/rgw, become: true }
+- name: Setup Mds Service
+  hosts: admin[0]
+  roles:
+    - { role: ../roles/ceph/mds, become: true }

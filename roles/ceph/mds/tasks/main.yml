@@ -1,0 +1,26 @@
+- name: Copy Service Manifest
+  ansible.builtin.copy:
+    src: services.yml
+    dest: /opt/mds_services.yml
+    mode: 0700
+- name: Setup mds service
+  ansible.builtin.command: ceph orch apply -i /opt/mds_services.yml
+  register: setup_mds_out
+- debug: var=setup_mds_out.stdout_lines
+- name: Generate Execution Script
+  template:
+    src: setup_fs.sh.j2
+    dest: /opt/setup_fs.sh
+    mode: 0700
+- name: Run Execution Script
+  ansible.builtin.command: /opt/setup_fs.sh
+  register: apply_out
+- debug: var=apply_out.stdout_lines
+- name: Remove Service Manifest
+  ansible.builtin.file:
+    path: /opt/mds_services.yml
+    state: absent
+- name: Remove Execution Script
+  ansible.builtin.file:
+    path: /opt/setup_fs.sh
+    state: absent
