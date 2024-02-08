@@ -11,47 +11,85 @@ while [ "$(ceph orch device ls | grep Yes | { grep -v grep || test $? = 1; } | w
 done
 
 #Control pool
-ceph osd pool create default.rgw.control 32 32 replicated {{ rgw_system_crush_rule }}
-ceph osd pool set default.rgw.control size 3
-ceph osd pool set default.rgw.control min_size 2
-ceph osd pool application enable default.rgw.control rgw
+if [ -z "$(ceph osd pool ls | grep default.rgw.control | { grep -v grep || test $? = 1; })"]; then
+  ceph osd pool create default.rgw.control 32 32 replicated {{ rgw_system_crush_rule }}
+  ceph osd pool set default.rgw.control size 3
+  ceph osd pool set default.rgw.control min_size 2
+  ceph osd pool application enable default.rgw.control rgw
+fi
+
+if [ -z "$(ceph osd pool get default.rgw.control crush_rule | grep {{ rgw_system_crush_rule }} | { grep -v grep || test $? = 1; })"]; then
+  ceph osd pool set default.rgw.control crush_rule {{ rgw_system_crush_rule }}
+fi
 
 #Meta pool
-ceph osd pool create default.rgw.meta 32 32 replicated {{ rgw_system_crush_rule }}
-ceph osd pool set default.rgw.meta size 3
-ceph osd pool set default.rgw.meta min_size 2
-ceph osd pool application enable default.rgw.meta rgw
+if [ -z "$(ceph osd pool ls | grep default.rgw.meta | { grep -v grep || test $? = 1; })"]; then
+  ceph osd pool create default.rgw.meta 32 32 replicated {{ rgw_system_crush_rule }}
+  ceph osd pool set default.rgw.meta size 3
+  ceph osd pool set default.rgw.meta min_size 2
+  ceph osd pool application enable default.rgw.meta rgw
+fi
+
+if [ -z "$(ceph osd pool get default.rgw.meta crush_rule | grep {{ rgw_system_crush_rule }} | { grep -v grep || test $? = 1; })"]; then
+  ceph osd pool set default.rgw.meta crush_rule {{ rgw_system_crush_rule }}
+fi
 
 #Log pool
-ceph osd pool create default.rgw.log 32 32 replicated {{ rgw_system_crush_rule }}
-ceph osd pool set default.rgw.log size 3
-ceph osd pool set default.rgw.log min_size 2
-ceph osd pool application enable default.rgw.log rgw
+if [ -z "$(ceph osd pool ls | grep default.rgw.log | { grep -v grep || test $? = 1; })"]; then
+  ceph osd pool create default.rgw.log 32 32 replicated {{ rgw_system_crush_rule }}
+  ceph osd pool set default.rgw.log size 3
+  ceph osd pool set default.rgw.log min_size 2
+  ceph osd pool application enable default.rgw.log rgw
+fi
+
+if [ -z "$(ceph osd pool get default.rgw.log crush_rule | grep {{ rgw_system_crush_rule }} | { grep -v grep || test $? = 1; })"]; then
+  ceph osd pool set default.rgw.log crush_rule {{ rgw_system_crush_rule }}
+fi
 
 #Otp pool
-ceph osd pool create default.rgw.otp 32 32 replicated {{ rgw_system_crush_rule }}
-ceph osd pool set default.rgw.otp size 3
-ceph osd pool set default.rgw.otp min_size 2
-ceph osd pool application enable default.rgw.otp rgw
+if [ -z "$(ceph osd pool ls | grep default.rgw.otp | { grep -v grep || test $? = 1; })"]; then
+  ceph osd pool create default.rgw.otp 32 32 replicated {{ rgw_system_crush_rule }}
+  ceph osd pool set default.rgw.otp size 3
+  ceph osd pool set default.rgw.otp min_size 2
+  ceph osd pool application enable default.rgw.otp rgw
+fi
+
+if [ -z "$(ceph osd pool get default.rgw.otp crush_rule | grep {{ rgw_system_crush_rule }} | { grep -v grep || test $? = 1; })"]; then
+  ceph osd pool set default.rgw.otp crush_rule {{ rgw_system_crush_rule }}
+fi
 
 #Default placement group index pool
-ceph osd pool create default.rgw.buckets.index 64 64 replicated {{ rgw_system_crush_rule }}
-ceph osd pool set default.rgw.buckets.index size 3
-ceph osd pool set default.rgw.buckets.index min_size 2
-ceph osd pool application enable default.rgw.buckets.index rgw
+if [ -z "$(ceph osd pool ls | grep default.rgw.buckets.index | { grep -v grep || test $? = 1; })"]; then
+  ceph osd pool create default.rgw.buckets.index 64 64 replicated {{ rgw_system_crush_rule }}
+  ceph osd pool set default.rgw.buckets.index size 3
+  ceph osd pool set default.rgw.buckets.index min_size 2
+  ceph osd pool application enable default.rgw.buckets.index rgw
+fi
+
+if [ -z "$(ceph osd pool get default.rgw.buckets.index crush_rule | grep {{ rgw_system_crush_rule }} | { grep -v grep || test $? = 1; })"]; then
+  ceph osd pool set default.rgw.buckets.index crush_rule {{ rgw_system_crush_rule }}
+fi
 
 #Default placement group extra data pool
-ceph osd pool create default.rgw.buckets.non-ec 64 64 replicated {{ rgw_system_crush_rule }}
-ceph osd pool set default.rgw.buckets.non-ec size 3
-ceph osd pool set default.rgw.buckets.non-ec min_size 2
-ceph osd pool application enable default.rgw.buckets.non-ec rgw
+if [ -z "$(ceph osd pool ls | grep default.rgw.buckets.non-ec | { grep -v grep || test $? = 1; })"]; then
+  ceph osd pool create default.rgw.buckets.non-ec 64 64 replicated {{ rgw_system_crush_rule }}
+  ceph osd pool set default.rgw.buckets.non-ec size 3
+  ceph osd pool set default.rgw.buckets.non-ec min_size 2
+  ceph osd pool application enable default.rgw.buckets.non-ec rgw
+fi
+
+if [ -z "$(ceph osd pool get default.rgw.buckets.non-ec crush_rule | grep {{ rgw_system_crush_rule }} | { grep -v grep || test $? = 1; })"]; then
+  ceph osd pool set default.rgw.buckets.non-ec crush_rule {{ rgw_system_crush_rule }}
+fi
 
 #Default placement group standard storage class
+if [ -z "$(ceph osd pool ls | grep default.rgw.buckets.data | { grep -v grep || test $? = 1; })"]; then
 {% if rgw_default_device_class is defined and rgw_default_device_class|length %}
-ceph osd erasure-code-profile set default-ec k={{ rgw_default_erasure_code_k }} m={{ rgw_default_erasure_code_m }} crush-root=default crush-failure-domain=host crush-device-class={{ rgw_default_device_class }}
+  ceph osd erasure-code-profile set default-ec k={{ rgw_default_erasure_code_k }} m={{ rgw_default_erasure_code_m }} crush-root=default crush-failure-domain=host crush-device-class={{ rgw_default_device_class }}
 {% else %}
-ceph osd erasure-code-profile set default-ec k={{ rgw_default_erasure_code_k }} m={{ rgw_default_erasure_code_m }} crush-root=default crush-failure-domain=host
+  ceph osd erasure-code-profile set default-ec k={{ rgw_default_erasure_code_k }} m={{ rgw_default_erasure_code_m }} crush-root=default crush-failure-domain=host
 {% endif %}
-ceph osd pool create default.rgw.buckets.data {{ rgw_default_data_pgs }} {{ rgw_default_data_pgs }} erasure default-ec --pg-num-min {{ rgw_default_data_pgs }}
-ceph osd pool set default.rgw.buckets.data min_size {{ rgw_default_erasure_code_k + 1 }}
-ceph osd pool application enable default.rgw.buckets.data rgw
+  ceph osd pool create default.rgw.buckets.data {{ rgw_default_data_pgs }} {{ rgw_default_data_pgs }} erasure default-ec --pg-num-min {{ rgw_default_data_pgs }}
+  ceph osd pool set default.rgw.buckets.data min_size {{ rgw_default_erasure_code_k + 1 }}
+  ceph osd pool application enable default.rgw.buckets.data rgw
+fi

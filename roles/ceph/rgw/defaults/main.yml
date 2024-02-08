@@ -1,4 +1,5 @@
 ---
+has_rgw: true
 has_ssd: false
 use_device_classes: false
 rgw_zone: "local"

@@ -13,7 +13,9 @@ while [ ! -z "$(ceph orch ls | grep rgw.default | grep "0/" | { grep -v grep || 
   sleep 10
 done
 
-ceph osd pool set .rgw.root crush_rule {{ rgw_system_crush_rule }}
+if [ -z "$(ceph osd pool get .rgw.root crush_rule | grep {{ rgw_system_crush_rule }} | { grep -v grep || test $? = 1; })"]; then
+  ceph osd pool set .rgw.root crush_rule {{ rgw_system_crush_rule }}
+fi
 
 {% if default_compression_algorithm is defined and default_compression_algorithm|length %}
 radosgw-admin zone placement modify \

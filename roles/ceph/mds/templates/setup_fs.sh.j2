@@ -30,5 +30,13 @@ if [ -z "$(ceph fs ls | grep 'name: {{ fs.name }},' | { grep -v grep || test $? 
 
   ceph fs new {{ fs.name }} {{ fs.name }}_metadata {{ fs.name }}_data
 fi
+
+if [ -z "$(ceph osd pool get {{ fs.name }}_data crush_rule | grep {{ cephfs_data_crush_rule }} | { grep -v grep || test $? = 1; })"]; then
+  ceph osd pool set {{ fs.name }}_data crush_rule {{ cephfs_data_crush_rule }}
+fi
+
+if [ -z "$(ceph osd pool get {{ fs.name }}_metadata crush_rule | grep {{ cephfs_metadata_crush_rule }} | { grep -v grep || test $? = 1; })"]; then
+  ceph osd pool set {{ fs.name }}_metadata crush_rule {{ cephfs_metadata_crush_rule }}
+fi
 {% endfor %}
 
