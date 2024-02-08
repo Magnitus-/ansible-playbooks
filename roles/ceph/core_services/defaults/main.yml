@@ -5,3 +5,4 @@ grafana_admin_password: ""
 grafana_anonymous_access: true
 redeploy_metrics_services: false
 metrics_hostnames: []
+osd_managed: true

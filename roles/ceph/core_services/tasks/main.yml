@@ -21,12 +21,22 @@
     path: /opt/ceph_apply_services.sh
     state: absent
 - name: Check If Osd Service Exists
-  ansible.builtin.shell: ceph orch ls | grep osd.all-available-devices
+  ansible.builtin.shell: ceph orch ls | grep osd.all-available-devices 
   register: osd_service_exists
   failed_when: osd_service_exists.rc > 1
-- name: Set Osd Service
+- name: Check If Unmanaged Osd Service Exists
+  ansible.builtin.shell: ceph orch ls | grep osd.all-available-devices | grep unmanaged
+  register: unmanaged_osd_service_exists
+  failed_when: unmanaged_osd_service_exists.rc > 1
+- name: Start Osd All Available Devices Service
   ansible.builtin.command: ceph orch apply osd --all-available-devices
-  register: set_osd_service
-  when: '"osd.all-available-devices" not in osd_service_exists.stdout'
-- debug: var=set_osd_service.stdout_lines
-  when: '"osd.all-available-devices" not in osd_service_exists.stdout'
+  register: start_osd_all_available_devices_service
+  when: '(("osd.all-available-devices" not in osd_service_exists.stdout) or ("osd.all-available-devices" in unmanaged_osd_service_exists.stdout)) and osd_managed'
+- debug: var=start_osd_all_available_devices_service.stdout_lines
+  when: '(("osd.all-available-devices" not in osd_service_exists.stdout) or ("osd.all-available-devices" in unmanaged_osd_service_exists.stdout)) and osd_managed'
+- name: Stop Osd All Available Devices Service
+  ansible.builtin.command: ceph orch apply osd --all-available-devices --unmanaged=true
+  register: stop_osd_all_available_devices_service
+  when: '(("osd.all-available-devices" in osd_service_exists.stdout) and ("osd.all-available-devices" not in unmanaged_osd_service_exists.stdout)) and not osd_managed'
+- debug: var=stop_osd_all_available_devices_service.stdout_lines
+  when: '(("osd.all-available-devices" in osd_service_exists.stdout) and ("osd.all-available-devices" not in unmanaged_osd_service_exists.stdout)) and not osd_managed'
