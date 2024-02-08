@@ -20,11 +20,11 @@ done
 
 {% for fs in cephfs_fs %}
 if [ -z "$(ceph fs ls | grep 'name: {{ fs.name }},' | { grep -v grep || test $? = 1; })" ]; then
-  ceph osd pool create {{ fs.name }}_data 64 64 replicated replicated_rule
+  ceph osd pool create {{ fs.name }}_data {{ fs.data_pgs }} {{ fs.data_pgs }} replicated {{ cephfs_data_crush_rule }} --pg-num-min {{ fs.data_pgs }}
   ceph osd pool set {{ fs.name }}_data size {{ fs.data_replication }}
   ceph osd pool set {{ fs.name }}_data min_size {{ fs.data_replication - 1 }}
 
-  ceph osd pool create {{ fs.name }}_metadata 32 32 replicated replicated_rule
+  ceph osd pool create {{ fs.name }}_metadata 32 32 replicated {{ cephfs_metadata_crush_rule }}
   ceph osd pool set {{ fs.name }}_metadata size {{ fs.metadata_replication }}
   ceph osd pool set {{ fs.name }}_metadata min_size {{ fs.metadata_replication - 1 }}
 

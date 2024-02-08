@@ -1,0 +1,17 @@
+- name: Generate Execution Script
+  template:
+    src: setup_crush_rules.sh
+    dest: /opt/setup_crush_rules.sh
+    mode: 0700
+  when: use_device_classes
+- name: Run Execution Script
+  ansible.builtin.command: /opt/setup_crush_rules.sh
+  register: apply_out
+  when: use_device_classes
+- debug: var=apply_out.stdout_lines
+  when: use_device_classes
+- name: Remove Execution Script
+  ansible.builtin.file:
+    path: /opt/setup_crush_rules.sh
+    state: absent
+  when: use_device_classes

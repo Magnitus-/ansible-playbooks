@@ -11,43 +11,47 @@ while [ "$(ceph orch device ls | grep Yes | { grep -v grep || test $? = 1; } | w
 done
 
 #Control pool
-ceph osd pool create default.rgw.control 32 32 replicated replicated_rule
+ceph osd pool create default.rgw.control 32 32 replicated {{ rgw_system_crush_rule }}
 ceph osd pool set default.rgw.control size 3
 ceph osd pool set default.rgw.control min_size 2
 ceph osd pool application enable default.rgw.control rgw
 
 #Meta pool
-ceph osd pool create default.rgw.meta 32 32 replicated replicated_rule
+ceph osd pool create default.rgw.meta 32 32 replicated {{ rgw_system_crush_rule }}
 ceph osd pool set default.rgw.meta size 3
 ceph osd pool set default.rgw.meta min_size 2
 ceph osd pool application enable default.rgw.meta rgw
 
 #Log pool
-ceph osd pool create default.rgw.log 32 32 replicated replicated_rule
+ceph osd pool create default.rgw.log 32 32 replicated {{ rgw_system_crush_rule }}
 ceph osd pool set default.rgw.log size 3
 ceph osd pool set default.rgw.log min_size 2
 ceph osd pool application enable default.rgw.log rgw
 
 #Otp pool
-ceph osd pool create default.rgw.otp 32 32 replicated replicated_rule
+ceph osd pool create default.rgw.otp 32 32 replicated {{ rgw_system_crush_rule }}
 ceph osd pool set default.rgw.otp size 3
 ceph osd pool set default.rgw.otp min_size 2
 ceph osd pool application enable default.rgw.otp rgw
 
 #Default placement group index pool
-ceph osd pool create default.rgw.buckets.index 64 64 replicated replicated_rule
+ceph osd pool create default.rgw.buckets.index 64 64 replicated {{ rgw_system_crush_rule }}
 ceph osd pool set default.rgw.buckets.index size 3
 ceph osd pool set default.rgw.buckets.index min_size 2
 ceph osd pool application enable default.rgw.buckets.index rgw
 
 #Default placement group extra data pool
-ceph osd pool create default.rgw.buckets.non-ec 64 64 replicated replicated_rule
+ceph osd pool create default.rgw.buckets.non-ec 64 64 replicated {{ rgw_system_crush_rule }}
 ceph osd pool set default.rgw.buckets.non-ec size 3
 ceph osd pool set default.rgw.buckets.non-ec min_size 2
 ceph osd pool application enable default.rgw.buckets.non-ec rgw
 
 #Default placement group standard storage class
-ceph osd erasure-code-profile set default-ec k={{ default_erasure_code_k }} m={{ default_erasure_code_m }} crush-failure-domain=host
-ceph osd pool create default.rgw.buckets.data 128 128 erasure default-ec
-ceph osd pool set default.rgw.buckets.data min_size {{ default_erasure_code_k + 1 }}
+{% if rgw_default_device_class is defined and rgw_default_device_class|length %}
+ceph osd erasure-code-profile set default-ec k={{ rgw_default_erasure_code_k }} m={{ rgw_default_erasure_code_m }} crush-root=default crush-failure-domain=host crush-device-class={{ rgw_default_device_class }}
+{% else %}
+ceph osd erasure-code-profile set default-ec k={{ rgw_default_erasure_code_k }} m={{ rgw_default_erasure_code_m }} crush-root=default crush-failure-domain=host
+{% endif %}
+ceph osd pool create default.rgw.buckets.data {{ rgw_default_data_pgs }} {{ rgw_default_data_pgs }} erasure default-ec --pg-num-min {{ rgw_default_data_pgs }}
+ceph osd pool set default.rgw.buckets.data min_size {{ rgw_default_erasure_code_k + 1 }}
 ceph osd pool application enable default.rgw.buckets.data rgw

@@ -1,9 +1,14 @@
 ---
+has_ssd: false
+use_device_classes: false
 rgw_zone: "local"
 rgw_ingress_frontend_port: 4443
 rgw_ingress_monitor_port: 1967
 server_cert: "server.crt"
 server_key: "server.key"
-default_erasure_code_k: 3
-default_erasure_code_m: 2
-default_compression_algorithm: lz4
+rgw_default_erasure_code_k: 3
+rgw_default_erasure_code_m: 2
+rgw_default_compression_algorithm: lz4
+rgw_default_data_pgs: 128
+rgw_default_device_class: "{{ 'hdd' if use_device_classes else ''}}"
+rgw_system_crush_rule: "{{ 'replicated_ssd' if use_device_classes and has_ssd else ('replicated_hdd' if use_device_classes else 'replicated_rule') }}"

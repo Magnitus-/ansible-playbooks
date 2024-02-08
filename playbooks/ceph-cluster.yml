@@ -24,6 +24,10 @@
   hosts: admin[0]
   roles:
     - { role: ../roles/ceph/hosts, become: true }
+- name: Setup Crush Rules
+  hosts: admin[0]
+  roles:
+    - { role: ../roles/ceph/crush_rules, become: true }
 - name: Setup Rgw Service
   hosts: admin[0]
   roles:
@@ -32,3 +36,7 @@
   hosts: admin[0]
   roles:
     - { role: ../roles/ceph/mds, become: true }
+- name: Tune Settings
+  hosts: admin[0]
+  roles:
+    - { role: ../roles/ceph/tuning, become: true }

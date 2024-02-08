@@ -1,0 +1,12 @@
+- name: Allow Override Recovery Settings
+  ansible.builtin.command: ceph config set osd osd_mclock_override_recovery_settings true
+  register: allow_override_out
+- debug: var=allow_override_out.stdout_lines
+- name: Set Max Backfills Setting
+  ansible.builtin.command: "ceph tell 'osd.*' injectargs --osd-max-backfills={{ osd_max_backfills }}"
+  register: set_max_backfills_out
+- debug: var=set_max_backfills_out.stdout_lines
+- name: Set Osd Pool Threshold
+  ansible.builtin.command: "ceph osd pool set threshold {{ osd_pool_threshold }}"
+  register: set_osd_pool_threshold_out
+- debug: var=set_osd_pool_threshold_out.stdout_lines

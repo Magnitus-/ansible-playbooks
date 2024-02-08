@@ -1,0 +1,5 @@
+---
+has_ssd: false
+use_device_classes: false
+cephfs_metadata_crush_rule: "{{ 'replicated_ssd' if use_device_classes and has_ssd else ('replicated_hdd' if use_device_classes else 'replicated_rule') }}"
+cephfs_data_crush_rule: "{{ 'replicated_hdd' if use_device_classes else 'replicated_rule' }}"
