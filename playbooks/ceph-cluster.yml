@@ -36,6 +36,10 @@
   hosts: admin[0]
   roles:
     - { role: ../roles/ceph/mds, become: true }
+- name: Setup Mds Users
+  hosts: admin[0]
+  roles:
+    - { role: ../roles/ceph/mds_users, become: true }
 - name: Tune Settings
   hosts: admin[0]
   roles:

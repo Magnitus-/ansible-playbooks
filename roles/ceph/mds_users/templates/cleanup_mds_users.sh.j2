@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+{% for user in mds_users_to_delete %}
+if [ ! -z "$(ceph auth ls | grep 'client.{{ user }}' | { grep -v grep || test $? = 1; })" ]; then
+  ceph auth del client.{{ user }}
+fi
+{% endfor %}

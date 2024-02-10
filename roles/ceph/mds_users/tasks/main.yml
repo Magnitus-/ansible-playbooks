@@ -1,0 +1,36 @@
+#Users Setup
+- name: Generate Users Setup Script
+  template:
+    src: setup_mds_users.sh.j2
+    dest: /opt/setup_mds_users.sh
+    mode: 0700
+  when: has_mds
+- name: Run Users Setup Script
+  ansible.builtin.command: /opt/setup_mds_users.sh
+  register: apply_out
+  when: has_mds
+- debug: var=apply_out.stdout_lines
+  when: has_mds
+- name: Remove Users Setup Script
+  ansible.builtin.file:
+    path: /opt/setup_mds_users.sh
+    state: absent
+  when: has_mds
+#Users Cleanup
+- name: Generate Users Cleanup Script
+  template:
+    src: cleanup_mds_users.sh.j2
+    dest: /opt/cleanup_mds_users.sh
+    mode: 0700
+  when: has_mds
+- name: Run Users Cleanup Script
+  ansible.builtin.command: /opt/cleanup_mds_users.sh
+  register: apply_out
+  when: has_mds
+- debug: var=apply_out.stdout_lines
+  when: has_mds
+- name: Remove Users Cleanup Script
+  ansible.builtin.file:
+    path: /opt/cleanup_mds_users.sh
+    state: absent
+  when: has_mds
