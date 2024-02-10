@@ -1,3 +1,4 @@
+#Setup mds service
 - name: Copy Service Manifest
   ansible.builtin.copy:
     src: services.yml
@@ -10,25 +11,44 @@
   when: has_mds
 - debug: var=setup_mds_out.stdout_lines
   when: has_mds
-- name: Generate Execution Script
-  template:
-    src: setup_fs.sh.j2
-    dest: /opt/setup_fs.sh
-    mode: 0700
-  when: has_mds
-- name: Run Execution Script
-  ansible.builtin.command: /opt/setup_fs.sh
-  register: apply_out
-  when: has_mds
-- debug: var=apply_out.stdout_lines
-  when: has_mds
 - name: Remove Service Manifest
   ansible.builtin.file:
     path: /opt/mds_services.yml
     state: absent
   when: has_mds
-- name: Remove Execution Script
+#Setup cephfh fs
+- name: Generate Fs Setup Script
+  template:
+    src: setup_fs.sh.j2
+    dest: /opt/setup_fs.sh
+    mode: 0700
+  when: has_mds
+- name: Run Fs Setup Script
+  ansible.builtin.command: /opt/setup_fs.sh
+  register: apply_out
+  when: has_mds
+- debug: var=apply_out.stdout_lines
+  when: has_mds
+- name: Remove Fs Setup Script
   ansible.builtin.file:
     path: /opt/setup_fs.sh
+    state: absent
+  when: has_mds
+#Cleanup cephfs fs
+- name: Generate Fs Cleanup Script
+  template:
+    src: cleanup_fs.sh.j2
+    dest: /opt/cleanup_fs.sh
+    mode: 0700
+  when: has_mds
+- name: Run Fs Cleanup Script
+  ansible.builtin.command: /opt/cleanup_fs.sh
+  register: apply_out
+  when: has_mds
+- debug: var=apply_out.stdout_lines
+  when: has_mds
+- name: Remove Fs Cleanup Script
+  ansible.builtin.file:
+    path: /opt/cleanup_fs.sh
     state: absent
   when: has_mds

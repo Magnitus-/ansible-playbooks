@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -e
+
+ceph tell mon.* injectargs --mon_allow_pool_delete true
+
+{% for fs in cephfs_fs_to_delete %}
+  if [ ! -z "$(ceph fs ls | grep 'name: {{ fs }},' | { grep -v grep || test $? = 1; })" ]; then
+    ceph fs set {{ fs }} down true
+    while [ -z "$(ceph fs get default | grep up | grep '{}' | { grep -v grep || test $? = 1; })" ]; do
+      sleep 1;
+    done
+    ceph fs rm {{ fs }} --yes-i-really-mean-it
+    ceph osd pool rm {{ fs }}_data {{ fs }}_data --yes-i-really-really-mean-it
+    ceph osd pool rm {{ fs }}_metadata {{ fs }}_metadata --yes-i-really-really-mean-it
+  fi
+{% endfor %}
+
+ceph tell mon.* injectargs --mon_allow_pool_delete false
