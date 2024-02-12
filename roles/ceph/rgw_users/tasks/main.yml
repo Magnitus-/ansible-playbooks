@@ -1,0 +1,36 @@
+#Users Setup
+- name: Generate Users Setup Script
+  template:
+    src: setup_rgw_users.sh.j2
+    dest: /opt/setup_rgw_users.sh
+    mode: 0700
+  when: has_rgw
+- name: Run Users Setup Script
+  ansible.builtin.command: /opt/setup_rgw_users.sh
+  register: apply_out
+  when: has_rgw
+- debug: var=apply_out.stdout_lines
+  when: has_rgw
+- name: Remove Users Setup Script
+  ansible.builtin.file:
+    path: /opt/setup_rgw_users.sh
+    state: absent
+  when: has_rgw
+#Users Cleanup
+- name: Generate Users Cleanup Script
+  template:
+    src: cleanup_rgw_users.sh.j2
+    dest: /opt/cleanup_rgw_users.sh
+    mode: 0700
+  when: has_rgw
+- name: Run Users Cleanup Script
+  ansible.builtin.command: /opt/cleanup_rgw_users.sh
+  register: apply_out
+  when: has_rgw
+- debug: var=apply_out.stdout_lines
+  when: has_rgw
+- name: Remove Users Cleanup Script
+  ansible.builtin.file:
+    path: /opt/cleanup_rgw_users.sh
+    state: absent
+  when: has_rgw

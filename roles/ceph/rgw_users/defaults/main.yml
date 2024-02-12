@@ -1,0 +1,4 @@
+---
+has_rgw: true
+rgw_users: []
+rgw_users_to_delete: []
