@@ -1,3 +1,4 @@
+#Setup
 - name: Generate Rgw Pools Setup Script
   template:
     src: setup_rgw_pools.sh.j2
@@ -43,3 +44,38 @@
     path: /opt/rgw_services.yml
     state: absent
   when: has_rgw
+#Cleanup
+- name: Copy Rgw Service Cleanup Script
+  ansible.builtin.copy:
+    src: cleanup_rgw_service.sh
+    dest: /opt/cleanup_rgw_service.sh
+    mode: 0700
+  when: (not has_rgw) and cleanup_rgw
+- name: Run Rgw Service Cleanup Script
+  ansible.builtin.command: /opt/cleanup_rgw_service.sh
+  register: service_cleanup_out
+  when: (not has_rgw) and cleanup_rgw
+- debug: var=service_cleanup_out.stdout_lines
+  when: (not has_rgw) and cleanup_rgw
+- name: Remove Rgw Service Cleanup Script
+  ansible.builtin.file:
+    path: /opt/cleanup_rgw_service.sh
+    state: absent
+  when: (not has_rgw) and cleanup_rgw
+- name: Copy Rgw Pools Cleanup Script
+  ansible.builtin.copy:
+    src: cleanup_rgw_pools.sh
+    dest: /opt/cleanup_rgw_pools.sh
+    mode: 0700
+  when: (not has_rgw) and cleanup_rgw
+- name: Run Rgw Pools Cleanup Script
+  ansible.builtin.command: /opt/cleanup_rgw_pools.sh
+  register: pools_cleanup_out
+  when: (not has_rgw) and cleanup_rgw
+- debug: var=pools_cleanup_out.stdout_lines
+  when: (not has_rgw) and cleanup_rgw
+- name: Remove Rgw Pools Cleanup Script
+  ansible.builtin.file:
+    path: /opt/cleanup_rgw_pools.sh
+    state: absent
+  when: (not has_rgw) and cleanup_rgw
