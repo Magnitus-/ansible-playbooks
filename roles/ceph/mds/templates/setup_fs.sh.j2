@@ -29,6 +29,16 @@ if [ -z "$(ceph fs ls | grep 'name: {{ fs.name }},' | { grep -v grep || test $? 
   ceph osd pool set {{ fs.name }}_metadata min_size {{ fs.metadata_replication - 1 }}
 
   ceph fs new {{ fs.name }} {{ fs.name }}_metadata {{ fs.name }}_data
+else
+  if [ -z "$(ceph osd pool get {{ fs.name }}_data size | grep 'size: {{ fs.data_replication }}' | { grep -v grep || test $? = 1; })" ]; then
+    ceph osd pool set {{ fs.name }}_data size {{ fs.data_replication }}
+    ceph osd pool set {{ fs.name }}_data min_size {{ fs.data_replication - 1 }}
+  fi
+
+  if [ -z "$(ceph osd pool get {{ fs.name }}_metadata size | grep 'size: {{ fs.metadata_replication }}' | { grep -v grep || test $? = 1; })" ]; then
+    ceph osd pool set {{ fs.name }}_metadata size {{ fs.metadata_replication }}
+    ceph osd pool set {{ fs.name }}_metadata min_size {{ fs.metadata_replication - 1 }}
+  fi
 fi
 
 if [ -z "$(ceph osd pool get {{ fs.name }}_data crush_rule | grep {{ cephfs_data_crush_rule }} | { grep -v grep || test $? = 1; })"]; then
