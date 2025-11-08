@@ -2,3 +2,7 @@
   ansible.builtin.apt:
     name: podman
     update_cache: yes
+- name: Install jq
+  ansible.builtin.apt:
+    name: jq
+    update_cache: yes

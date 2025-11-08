@@ -1,0 +1,13 @@
+- name: Generate Maintenance Script
+  template:
+    src: set_maintenance_status.sh.j2
+    dest: /opt/set_maintenance_status.sh
+    mode: 0700
+- name: Run Maintenance Script
+  ansible.builtin.command: /opt/set_maintenance_status.sh
+  register: apply_out
+- debug: var=apply_out.stdout_lines
+- name: Remove Maintenance Script
+  ansible.builtin.file:
+    path: /opt/set_maintenance_status.sh
+    state: absent

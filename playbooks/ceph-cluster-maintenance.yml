@@ -1,0 +1,4 @@
+- name: Hosts Maintenance
+  hosts: admin[0]
+  roles:
+    - { role: ../roles/ceph/hosts_maintenance, become: true }

@@ -1,0 +1,74 @@
+#!/bin/sh
+
+set -e
+
+set_hosts_maintenance_status() {
+{% for host in (groups['all'] | map('extract', hostvars)) %}
+  HOST_NAME=$(echo -n "$(ceph orch host ls --format json | jq '.[] | select(.addr == "{{ host.ansible_host }}") | .hostname' | xargs)")
+{% set in_maintenance = ((groups['maintenance'] | map('extract', hostvars) | map(attribute='ansible_host')) is contains(host.ansible_host)) %}
+{% if in_maintenance %}
+  if [ -z "$(ceph orch host ls | grep Maintenance | grep "$HOST_NAME" | { grep -v grep || test $? = 1; })" ]; then
+    MAINTENACE_OUTPUT=$(ceph orch host maintenance enter "$HOST_NAME" 2>&1)
+    if [ ! -z "$(echo $MAINTENACE_OUTPUT | grep "ALERT: Cannot stop active Mgr daemon, Please switch active Mgrs with" | { grep -v grep || test $? = 1; })" ]; then
+      ACTIVE_MGR=$(echo $MAINTENACE_OUTPUT | grep -oP "(?<=ceph mgr fail )[^']+")
+      ceph mgr fail $ACTIVE_MGR
+      while [ ! -z "$(ceph mgr stat | grep "\"active_name\": \"$ACTIVE_MGR\"" | { grep -v grep || test $? = 1; })" ]; do
+        sleep 0.1
+      done
+      while [ -z "$(ceph mgr stat | grep "\"available\": true" | { grep -v grep || test $? = 1; })" ]; do
+        sleep 0.1
+      done
+      MAINTENACE_OUTPUT=$(ceph orch host maintenance enter "$HOST_NAME" 2>&1)
+      if [ ! -z "$MAINTENACE_OUTPUT" ]; then
+        echo $MAINTENACE_OUTPUT
+      fi
+    else
+      if [ ! -z "$MAINTENACE_OUTPUT" ]; then
+        echo $MAINTENACE_OUTPUT
+      fi
+    fi
+  fi
+{% else %}
+  if [ ! -z "$(ceph orch host ls | grep Maintenance | grep "$HOST_NAME" | { grep -v grep || test $? = 1; })" ]; then
+    ceph orch host maintenance exit "$HOST_NAME"
+  fi
+{% endif %}
+{% endfor %}
+}
+
+{% if 'maintenance' in groups and groups['maintenance'] | length > 0 %}
+
+if [ -z "$(ceph osd dump | grep ^flags | grep noout | { grep -v grep || test $? = 1; })" ]; then
+  ceph osd set noout
+fi
+
+if [ -z "$(ceph osd dump | grep ^flags | grep norebalance | { grep -v grep || test $? = 1; })" ]; then
+  ceph osd set norebalance
+fi
+
+if [ -z "$(ceph osd dump | grep ^flags | grep norecover | { grep -v grep || test $? = 1; })" ]; then
+  ceph osd set norecover
+fi
+
+set_hosts_maintenance_status
+
+{% else %}
+
+set_hosts_maintenance_status
+
+if [ ! -z "$(ceph osd dump | grep ^flags | grep noout | { grep -v grep || test $? = 1; })" ]; then
+  ceph osd unset noout
+fi
+
+if [ ! -z "$(ceph osd dump | grep ^flags | grep norebalance | { grep -v grep || test $? = 1; })" ]; then
+  ceph osd unset norebalance
+fi
+
+if [ ! -z "$(ceph osd dump | grep ^flags | grep norecover | { grep -v grep || test $? = 1; })" ]; then
+  ceph osd unset norecover
+fi
+
+{% endif %}
+
+
+
