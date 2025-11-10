@@ -1,3 +1,7 @@
+- name: Setup Ceph Core Dependencies
+  hosts: ceph
+  roles:
+    - { role: ../roles/ceph/dependencies, become: true }
 - name: Hosts Maintenance
   hosts: admin[0]
   roles:
