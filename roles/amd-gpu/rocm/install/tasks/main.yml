@@ -1,0 +1,53 @@
+- name: Check if rocminf exists in PATH
+  ansible.builtin.command:
+    argv:
+      - which
+      - rocminfo
+  register: binary_check
+  failed_when: binary_check.rc not in [0, 1]
+  changed_when: false
+
+- name: Install pre-requisite libraries
+  ansible.builtin.apt:
+    pkg:
+      - libatomic1
+      - libquadmath0
+    update_cache: yes
+  become: yes
+  when: binary_check.rc == 1
+
+- name: Add user to render and video groups
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
+    groups: render,video
+    append: yes
+  become: yes
+  when: binary_check.rc == 1
+
+- name: Reboot the machine
+  ansible.builtin.reboot:
+  become: yes
+  when: binary_check.rc == 1
+
+- name: Install amdgpu-install .deb over HTTPS
+  ansible.builtin.apt:
+    deb: "{{ amdgpu_install_url[ansible_distribution_version] }}"
+    state: present
+  become: yes
+  when: binary_check.rc == 1
+
+- name: Install rocm + vulkan support
+  ansible.builtin.shell: amdgpu-install -y --usecase=rocm,graphics --gfxversion=auto
+  become: yes
+  when: binary_check.rc == 1
+  register: rocm_install_result
+
+- name: Output from rocm installation
+  ansible.builtin.debug:
+    var: rocm_install_result.stdout
+  when: binary_check.rc == 1
+
+- name: Reboot the machine
+  ansible.builtin.reboot:
+  become: yes
+  when: binary_check.rc == 1

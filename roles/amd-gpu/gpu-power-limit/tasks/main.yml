@@ -1,0 +1,22 @@
+- name: Copy Amd Gpu Power Limit Script
+  ansible.builtin.copy:
+    src: amd_gpu_power_limit.sh
+    dest: /usr/local/bin/amd_gpu_power_limit.sh
+    owner: root
+    group: root
+    mode: 0555
+- name: Generate Amd Gpu Power Limit Systemd Service
+  template:
+    src: amd-gpu-power-limit.service.j2
+    dest: /etc/systemd/system/amd-gpu-power-limit.service
+    owner: root
+    group: root
+    mode: 0640
+- name: Ensure Systemd Has Reloaded Configs
+  ansible.builtin.systemd:
+    daemon_reload: yes
+- name: Enable and Start the Service
+  ansible.builtin.systemd:
+    enabled: yes
+    state: started
+    name: amd-gpu-power-limit.service

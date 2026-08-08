@@ -1,0 +1,66 @@
+- name: Check if rocminf exists in PATH
+  ansible.builtin.command:
+    argv:
+      - which
+      - rocminfo
+  register: binary_check
+  failed_when: binary_check.rc not in [0, 1]
+  changed_when: false
+
+- name: Uninstall rocm + vulkan support
+  ansible.builtin.shell: amdgpu-uninstall
+  become: yes
+  when: binary_check.rc == 0
+  register: rocm_uninstall_result
+
+- name: Output from rocm uninstallation
+  ansible.builtin.debug:
+    var: rocm_uninstall_result.stdout
+  when: binary_check.rc == 0
+
+- name: Purge amdgpu-install
+  ansible.builtin.apt:
+    name: amdgpu-install
+    state: absent
+    purge: true
+  become: true
+  when: binary_check.rc == 0
+
+- name: Remove packages that are no longer required
+  ansible.builtin.apt:
+    autoremove: true
+  become: true
+  when: binary_check.rc == 0
+
+- name: Find entries in the APT cache directory
+  ansible.builtin.find:
+    paths:
+      - /var/cache/apt
+    recurse: false
+    file_type: any
+    hidden: true
+  register: apt_cache_entries
+  become: true
+  when: binary_check.rc == 0
+
+- name: Remove entries from the APT cache directory
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ apt_cache_entries.files }}"
+  loop_control:
+    label: "{{ item.path }}"
+  become: true
+  when: binary_check.rc == 0
+
+- name: Clean the APT package archive
+  ansible.builtin.apt:
+    clean: true
+  become: true
+  when: binary_check.rc == 0
+
+- name: Update the APT package index
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+  when: binary_check.rc == 0

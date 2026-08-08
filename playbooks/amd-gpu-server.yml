@@ -1,0 +1,7 @@
+- name: Setup Amd Gpu Server
+  hosts: all
+  roles:
+    - { role: ../roles/amd-gpu/rocm/install }
+    - role: ../roles/amd-gpu/gpu-power-limit
+      become: true
+      when: gpu_power_limit is defined

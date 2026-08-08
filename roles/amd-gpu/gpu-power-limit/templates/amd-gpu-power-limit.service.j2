@@ -1,0 +1,19 @@
+[Unit]
+Description=Limit AMD GPU power to {{ gpu_power_limit }}W
+After=systemd-modules-load.service
+StartLimitIntervalSec=60
+StartLimitBurst=15
+
+[Service]
+Type=oneshot
+
+Environment="GPU_POWER_LIMIT={{ gpu_power_limit }}"
+
+ExecStart=/usr/local/bin/amd_gpu_power_limit.sh
+
+RemainAfterExit=yes
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

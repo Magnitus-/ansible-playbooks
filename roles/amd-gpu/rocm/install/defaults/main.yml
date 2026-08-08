@@ -1,0 +1,4 @@
+amdgpu_install_url:
+  "22.04": https://repo.radeon.com/amdgpu-install/31.40/ubuntu/jammy/amdgpu-install_31.40.314000-1_all.deb
+  "24.04": https://repo.radeon.com/amdgpu-install/31.40/ubuntu/noble/amdgpu-install_31.40.314000-1_all.deb
+  "26.04": https://repo.radeon.com/amdgpu-install/31.40/ubuntu/resolute/amdgpu-install_31.40.314000-1_all.deb
