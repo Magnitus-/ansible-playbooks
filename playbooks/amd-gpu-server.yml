@@ -5,3 +5,11 @@
     - role: ../roles/amd-gpu/gpu-power-limit
       become: true
       when: gpu_power_limit is defined
+    - role: ../roles/amd-gpu/llama-cpp/models
+      when:
+       - llama_cpp is defined
+       - llama_cpp.models_dir is defined
+    - role: ../roles/amd-gpu/llama-cpp/vulkan/bare-metal/install
+      become: true
+      when: llama_cpp.vulkan.baremetal | default(false) | bool
+  

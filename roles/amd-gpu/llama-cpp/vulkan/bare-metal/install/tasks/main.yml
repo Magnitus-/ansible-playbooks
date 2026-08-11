@@ -1,0 +1,62 @@
+- name: Install pre-requisite libraries
+  ansible.builtin.apt:
+    pkg:
+      - vulkan-tools
+    update_cache: yes
+
+- name: Create llama.cpp Vulkan Etc directory
+  ansible.builtin.file:
+    path: /etc/llama.cpp/vulkan
+    state: directory
+    mode: "0755"
+
+- name: Check Status of Llama.cpp Vulkan Url Marker
+  ansible.builtin.stat:
+    path: /etc/llama.cpp/vulkan/.installed_url
+  register: llama_cpp_vulkan_url_marker
+
+- name: Get Base64 of Llama.cpp Vulkan Url Marker
+  ansible.builtin.slurp:
+    src: /etc/llama.cpp/vulkan/.installed_url
+  register: llama_cpp_vulkan_url_marker_b64
+  when: llama_cpp_vulkan_url_marker.stat.exists
+
+- name: Install llama.cpp Vulkan archive
+  when: >
+    not llama_cpp_vulkan_url_marker.stat.exists
+    or
+    (llama_cpp_vulkan_url_marker_b64['content'] | b64decode | trim) != llama_cpp_vulkan_archive_url
+  block:
+    - name: Remove llama.cpp Vulkan Opt directory
+      ansible.builtin.file:
+        path: /opt/llama.cpp/vulkan
+        state: absent
+
+    - name: Create llama.cpp Vulkan Opt directory
+      ansible.builtin.file:
+        path: /opt/llama.cpp/vulkan
+        state: directory
+        mode: '0755'
+
+    - name: Download llama.cpp Vulkan archive
+      ansible.builtin.get_url:
+        url: "{{ llama_cpp_vulkan_archive_url }}"
+        dest: /tmp/llama-cpp-vulkan.tar.gz
+        mode: "0644"
+
+    - name: Extract llama.cpp Vulkan archive
+      ansible.builtin.unarchive:
+        src: /tmp/llama-cpp-vulkan.tar.gz
+        dest: /opt/llama.cpp/vulkan
+        remote_src: true
+
+    - name: Record installed Vulkan archive URL
+      ansible.builtin.copy:
+        content: "{{ llama_cpp_vulkan_archive_url }}"
+        dest: /etc/llama.cpp/vulkan/.installed_url
+        mode: "0644"
+
+    - name: Remove llama.cpp Vulkan archive
+      ansible.builtin.file:
+        path: /tmp/llama-cpp-vulkan.tar.gz
+        state: absent
