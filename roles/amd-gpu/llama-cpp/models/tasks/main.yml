@@ -7,7 +7,7 @@
 
 - name: Create llama.cpp Models
   ansible.builtin.file:
-    path: /opt/llama.cpp/models
+    path: "{{ llama_cpp.dest_models_dir | default('/opt/llama.cpp/models') }}"
     state: directory
     mode: '0755'
     owner: "{{ ansible_user_id }}"
@@ -16,5 +16,5 @@
 - name: Sync models directory
   ansible.posix.synchronize:
     use_ssh_args: true
-    src: "{{ llama_cpp.models_dir }}/"
-    dest: /opt/llama.cpp/models/
+    src: "{{ llama_cpp.src_models_dir }}/"
+    dest: "{{ llama_cpp.dest_models_dir | default('/opt/llama.cpp/models') }}/"
