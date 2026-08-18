@@ -1,0 +1,83 @@
+all:
+  vars:
+    server_ca_cert: /home/jim/ceph-secrets/ca.crt
+    server_cert: /home/jim/ceph-secrets/server.crt
+    server_key: /home/jim/ceph-secrets/server.key
+    ssh_key: /home/jim/ceph-secrets/ssh_key
+    ssh_public: /home/jim/ceph-secrets/ssh_key_public
+    public_network: "192.168.70.0/24"
+    cluster_network: "192.168.71.0/24"
+    rgw_ingress_ip: "192.168.70.200/24"
+    grafana_admin_password: "donotusethispassword"
+    rgw_zone: "ourlab"
+    use_device_classes: true
+    has_ssd: true
+    has_rgw: true
+    cleanup_rgw: false
+    has_mds: true
+    osd_managed: true
+    cephfs_fs:
+      - name: jim_cephfs
+        data_replication: 3
+        metadata_replication: 3
+        data_pgs: 128
+    cephfs_fs_to_delete: []
+    mds_users:
+      - name: jim-mds
+        fs: jim_cephfs
+    mds_users_to_delete: []
+    rgw_users:
+      - name: jim
+        tenant: ourlab
+        display_name: "Jim Jim"
+        email: "jim@jim.com"
+      - name: joe
+        tenant: ourlab
+        display_name: "Joe Joe"
+        email: "joe@joe.com"
+  children:
+    ceph:
+      hosts:
+        server1:
+        server2:
+        server3:
+        server4:
+        server5:
+    admin:
+      hosts:
+        server1:
+        server2:
+        server3:
+    metrics:
+      hosts:
+        server1:
+        server2:
+        server3:
+    mon:
+      hosts:
+        server1:
+        server2:
+        server3:
+    mgr:
+      hosts:
+        server1:
+        server2:
+        server3:
+    rgw:
+      hosts:
+        server1:
+        server2:
+        server3:
+    mds:
+      hosts:
+        server1:
+        server2:
+        server3:
+    maintenance:
+      hosts:
+  hosts:
+    server1:
+    server2:
+    server3:
+    server4:
+    server5:

@@ -1,0 +1,42 @@
+all:
+  vars:
+    coredns_domain: mylab.lan
+    coredns_forward_servers:
+      - 192.168.70.1
+    coredns_domains:
+      - domain: mylab.lan
+        zonefiles:
+          - domain: mylab.lan
+            cache_ttl: 60
+            dns_server_name: dns1.mylab.lan
+            email: my@email.com
+            a_records:
+              - prefix: server1
+                ip: 192.168.70.21
+              - prefix: server2
+                ip: 192.168.70.22
+              - prefix: server3
+                ip: 192.168.70.23
+              - prefix: server4
+                ip: 192.168.70.24
+              - prefix: server5
+                ip: 192.168.70.25
+              - prefix: server6
+                ip: 192.168.70.26
+              - prefix: dns1
+                ip: 192.168.70.50
+              - prefix: dns2
+                ip: 192.168.70.51
+              - prefix: rgw
+                ip: 192.168.70.200
+            mx_records: []
+            ns_records: []
+            txt_records: []
+  children:
+    coredns:
+      hosts:
+        servera:
+        serverb:
+  hosts:
+    servera:
+    serverb:
