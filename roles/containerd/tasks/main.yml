@@ -1,0 +1,71 @@
+- name: Download and extract containerd tar archive
+  ansible.builtin.unarchive:
+    src: https://github.com/containerd/containerd/releases/download/v2.3.4/containerd-2.3.4-linux-amd64.tar.gz
+    dest: /usr/local
+    remote_src: true
+    mode: '0755'
+  become: true
+
+- name: Install runc
+  ansible.builtin.get_url:
+    url: https://github.com/opencontainers/runc/releases/download/v1.5.1/runc.amd64
+    dest: /usr/local/sbin/runc
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create cni directory
+  ansible.builtin.file:
+    path: /opt/cni/bin
+    state: directory
+    mode: '0755'
+
+- name: Download and extract cni tar archive
+  ansible.builtin.unarchive:
+    src: https://github.com/containernetworking/plugins/releases/download/v1.9.1/cni-plugins-linux-amd64-v1.9.1.tgz
+    dest: /opt/cni/bin
+    remote_src: true
+    mode: '0755'
+  become: true
+
+- name: Download and extract buildkit tar archive
+  ansible.builtin.unarchive:
+    src: https://github.com/moby/buildkit/releases/download/v0.32.2/buildkit-v0.32.2.linux-amd64.tar.gz
+    dest: /usr/local
+    remote_src: true
+    mode: '0755'
+
+- name: Download and extract nerdctl tar archive
+  ansible.builtin.unarchive:
+    src: https://github.com/containerd/nerdctl/releases/download/v2.3.5/nerdctl-2.3.5-linux-amd64.tar.gz
+    dest: /usr/local/bin
+    remote_src: true
+    mode: '0755'
+
+- name: Copy containerd service unit
+  ansible.builtin.copy:
+    src: containerd.service
+    dest: /etc/systemd/system/containerd.service
+    mode: 0640
+
+- name: Copy buildkit service unit
+  ansible.builtin.copy:
+    src: buildkit.service
+    dest: /etc/systemd/system/buildkit.service
+    mode: 0640
+
+- name: Reload systemd units
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Enabled and start containerd service
+  ansible.builtin.systemd_service:
+    name: containerd.service
+    enabled: true
+    state: started
+
+- name: Enabled and start buildkit service
+  ansible.builtin.systemd_service:
+    name: buildkit.service
+    enabled: true
+    state: started

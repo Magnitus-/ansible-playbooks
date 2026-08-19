@@ -1,0 +1,24 @@
+[Unit]
+Description=Containerd Service
+After=network.target dbus.service
+
+[Service]
+Type=notify
+Delegate=yes
+KillMode=process
+
+Restart=always
+RestartSec=2
+StartLimitBurst=5
+StartLimitInterval=60s
+
+OOMScoreAdjust=-999
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+
+ExecStartPre=-/sbin/modprobe overlay
+ExecStart=/usr/local/bin/containerd
+
+[Install]
+WantedBy=multi-user.target
