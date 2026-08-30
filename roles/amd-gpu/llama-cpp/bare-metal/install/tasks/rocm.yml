@@ -1,0 +1,68 @@
+- name: Create llama.cpp Rocm Etc directory
+  ansible.builtin.file:
+    path: /etc/llama.cpp/rocm
+    state: directory
+    mode: "0755"
+
+- name: Check Status of Llama.cpp Rocm Url Marker
+  ansible.builtin.stat:
+    path: /etc/llama.cpp/rocm/.installed_url
+  register: llama_cpp_rocm_url_marker
+
+- name: Get Base64 of Llama.cpp Rocm Url Marker
+  ansible.builtin.slurp:
+    src: /etc/llama.cpp/rocm/.installed_url
+  register: llama_cpp_rocm_url_marker_b64
+  when: llama_cpp_rocm_url_marker.stat.exists
+
+- name: Install llama.cpp Rocm archive
+  when: >
+    not llama_cpp_rocm_url_marker.stat.exists
+    or
+    (llama_cpp_rocm_url_marker_b64['content'] | b64decode | trim) != llama_cpp_rocm_archive_url
+  block:
+    - name: Remove llama.cpp Rocm Opt directory
+      ansible.builtin.file:
+        path: /opt/llama.cpp/rocm
+        state: absent
+
+    - name: Create llama.cpp Rocm Opt directory
+      ansible.builtin.file:
+        path: /opt/llama.cpp/rocm
+        state: directory
+        mode: '0755'
+
+    - name: Download llama.cpp Rocm archive
+      ansible.builtin.get_url:
+        url: "{{ llama_cpp_rocm_archive_url }}"
+        dest: /tmp/llama-cpp-rocm.tar.gz
+        mode: "0644"
+
+    - name: Extract llama.cpp Rocm archive
+      ansible.builtin.unarchive:
+        src: /tmp/llama-cpp-rocm.tar.gz
+        dest: /opt/llama.cpp/rocm
+        remote_src: true
+
+    - name: Record installed Rocm archive URL
+      ansible.builtin.copy:
+        content: "{{ llama_cpp_rocm_archive_url }}"
+        dest: /etc/llama.cpp/rocm/.installed_url
+        mode: "0644"
+
+    - name: Remove llama.cpp Rocm archive
+      ansible.builtin.file:
+        path: /tmp/llama-cpp-rocm.tar.gz
+        state: absent
+
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Stop llama_cpp_server if it exists
+      ansible.builtin.systemd:
+        name: llama_cpp_server
+        state: stopped
+      become: true
+      when:
+        - ansible_facts.services is defined
+        - "'llama_cpp_server' in ansible_facts.services"

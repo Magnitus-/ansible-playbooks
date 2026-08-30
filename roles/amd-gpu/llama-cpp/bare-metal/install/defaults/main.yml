@@ -1,0 +1,2 @@
+llama_cpp_vulkan_archive_url: https://github.com/ggml-org/llama.cpp/releases/download/b10686/llama-b10686-bin-ubuntu-vulkan-x64.tar.gz
+llama_cpp_rocm_archive_url: https://github.com/ggml-org/llama.cpp/releases/download/b10686/llama-b10686-bin-ubuntu-rocm-7.14-x64.tar.gz

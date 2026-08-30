@@ -47,6 +47,25 @@
     var: rocm_install_result.stdout
   when: binary_check.rc == 1
 
+- name: Configure ROCm library path
+  ansible.builtin.copy:
+    dest: /etc/ld.so.conf.d/rocm.conf
+    content: |
+      /opt/rocm/lib
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  register: rocm_ld_config
+  when: binary_check.rc == 1
+
+- name: Update dynamic linker cache
+  ansible.builtin.command: ldconfig
+  become: yes
+  when:
+    - binary_check.rc == 1
+    - rocm_ld_config.changed
+
 - name: Reboot the machine
   ansible.builtin.reboot:
   become: yes

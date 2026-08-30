@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-SERVER_BINARY_ARRAY=(/opt/llama.cpp/vulkan/llama-*/llama-server)
+SERVER_BINARY_ARRAY=(/opt/llama.cpp/$SERVER_COMPUTE_BACKEND/llama-*/llama-server)
 SERVER_BINARY="${SERVER_BINARY_ARRAY[0]}"
 
 TENSOR_SPLIT=""

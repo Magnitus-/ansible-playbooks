@@ -7,6 +7,22 @@
   failed_when: binary_check.rc not in [0, 1]
   changed_when: false
 
+- name: Remove ROCm library path configuration
+  ansible.builtin.file:
+    path: /etc/ld.so.conf.d/rocm.conf
+    state: absent
+  become: yes
+  register: rocm_ld_config_removed
+  when: binary_check.rc == 0
+
+- name: Update dynamic linker cache
+  ansible.builtin.command: ldconfig
+  become: yes
+  changed_when: false
+  when:
+    - binary_check.rc == 0 
+    - rocm_ld_config_removed.changed
+
 - name: Uninstall rocm + vulkan support
   ansible.builtin.shell: amdgpu-uninstall
   become: yes

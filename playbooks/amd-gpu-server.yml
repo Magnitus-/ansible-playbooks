@@ -10,10 +10,9 @@
       when:
        - llama_cpp is defined
        - llama_cpp.src_models_dir is defined
-    - role: ../roles/amd-gpu/llama-cpp/vulkan/bare-metal/install
+    - role: ../roles/amd-gpu/llama-cpp/bare-metal/install
       become: true
-      when: llama_cpp.vulkan.baremetal | default(false) | bool
-    - role: ../roles/amd-gpu/llama-cpp/vulkan/bare-metal/server
+    - role: ../roles/amd-gpu/llama-cpp/bare-metal/server
       become: true
-      when: (llama_cpp.vulkan.baremetal | default(false) | bool) and llama_cpp.vulkan.server is defined
+      when: llama_cpp.baremetal.server is defined
   

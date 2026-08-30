@@ -60,3 +60,15 @@
       ansible.builtin.file:
         path: /tmp/llama-cpp-vulkan.tar.gz
         state: absent
+
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Stop llama_cpp_server if it exists
+      ansible.builtin.systemd:
+        name: llama_cpp_server
+        state: stopped
+      become: true
+      when:
+        - ansible_facts.services is defined
+        - "'llama_cpp_server' in ansible_facts.services"

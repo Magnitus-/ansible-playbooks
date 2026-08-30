@@ -1,0 +1,6 @@
+
+---
+- include_tasks: vulkan.yml
+  when: llama_cpp.baremetal.install.vulkan | default(false) | bool
+- include_tasks: rocm.yml
+  when: llama_cpp.baremetal.install.rocm | default(false) | bool

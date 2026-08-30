@@ -1,0 +1,30 @@
+[Unit]
+Description="Llama.cpp Server"
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+Environment="SERVER_PORT={{ llama_cpp.baremetal.server.port | default(8080) }}"
+Environment="SERVER_MODEL_DIR={{ llama_cpp.dest_models_dir | default('/opt/llama.cpp/models') }}"
+Environment="SERVER_COMPUTE_BACKEND={{ llama_cpp.baremetal.server.compute_backend }}"
+{% if llama_cpp.baremetal.server.max_models is defined %}
+Environment="SERVER_MAX_MODELS={{ llama_cpp.baremetal.server.max_models }}"
+{% endif %}
+{% if llama_cpp.baremetal.server.tensor_split is defined and llama_cpp.baremetal.server.tensor_split | length > 0 %}
+Environment="SERVER_TENSOR_SPLIT={{ llama_cpp.baremetal.server.tensor_split | join(',') }}"
+{% endif %}
+{% if llama_cpp.baremetal.server.tls is defined and llama_cpp.baremetal.server.tls.server_cert is defined and llama_cpp.baremetal.server.tls.server_key is defined %}
+Environment="SERVER_TLS_CERT=/etc/llama.cpp/server/tls/server.crt"
+Environment="SERVER_TLS_KEY=/etc/llama.cpp/server/tls/server.key"
+{% endif %}
+{% if llama_cpp.baremetal.server.api_keys is defined %}
+Environment="SERVER_API_KEYS=/etc/llama.cpp/server/api_keys"
+{% endif %}
+ExecStart=/usr/local/bin/llama_cpp_server.sh
+
+[Install]
+WantedBy=multi-user.target
