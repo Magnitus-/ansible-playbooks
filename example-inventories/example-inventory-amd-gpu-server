@@ -5,10 +5,13 @@ all:
       gpu_power_limit: 225
       llama_cpp:
         src_models_dir: /home/jim/llama_cpp_models
-        vulkan:
-          baremetal: true
+        baremetal:
+          install:
+            vulkan: true
+            rocm: true
           server:
             enabled: true
+            compute_backend: rocm
             max_models: 1
             port: 8080
             tensor_split:
