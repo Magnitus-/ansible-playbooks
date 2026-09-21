@@ -1,0 +1,27 @@
+- name: Check if amd-ctk exists in PATH
+  ansible.builtin.command:
+    argv:
+      - which
+      - amd-ctk
+  register: binary_check
+  failed_when: binary_check.rc not in [0, 1]
+  changed_when: false
+
+- name: Add amd container toolkit apt repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/amd-container-toolkit/apt/ {{ ansible_distribution_release }} main"
+    filename: amd-container-toolkit
+    state: present
+    update_cache: yes
+  when: binary_check.rc == 1
+
+- name: Install amd container toolkit
+  ansible.builtin.apt:
+    pkg:
+      - amd-container-toolkit
+    update_cache: yes
+  when: binary_check.rc == 1
+
+- name: Generate CDI Specification
+  ansible.builtin.shell: amd-ctk cdi generate --output=/etc/cdi/amd.json
+  when: binary_check.rc == 1
