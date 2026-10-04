@@ -16,16 +16,14 @@ ExecStart=nerdctl run --rm \
 {% if notebook.tls is defined and notebook.server_cert is defined and notebook.tls.server_key is defined %}
   -v /etc/notebook/tls:/etc/notebook/tls \
 {% endif %}
-{% for host_path, container_path in notebook.mapped_volumes.items() %}
-  -v {{ host_path }}:{{ container_path }} \
+{% for vol in notebook.mapped_volumes %}
+  -v {{ vol.host_dir }}:{{ vol.container_dir }} \
 {% endfor %}
   -p 0.0.0.0:{{ notebook.main_port }}:{{ notebook.main_port }} \
 {% if notebook.additional_ports is defined %}
   -p 0.0.0.0:{{ notebook.additional_ports }}:{{ notebook.additional_ports }} \
 {% endif %}
-{% if notebook.container_workdir is defined %}
-  -w {{ notebook.container_workdir }} \
-{% endif %}
+  -w {{ notebook.mapped_volumes[0].container_dir }} \
   {{ notebook.image_name }} /usr/local/bin/entrypoint.sh
 ExecStop=nerdctl stop notebook
 

@@ -3,10 +3,19 @@
     path: "{{ item }}"
     state: directory
     mode: '0755'
+    recurse: true
   loop:
     - /etc/notebook
     - /etc/notebook/entrypoint
     - /etc/notebook/tls
+
+- name: Ensure host volume directories exist
+  ansible.builtin.file:
+    path: "{{ item.host_dir }}"
+    state: directory
+    mode: '0755'
+    recurse: true
+  loop: "{{ notebook.mapped_volumes }}"
 
 - name: Generate entrypoint
   ansible.builtin.template:

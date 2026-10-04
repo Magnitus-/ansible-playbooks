@@ -1,6 +1,6 @@
 notebook:
   main_port: 8000
   image_name: local-uv-amd:v1
-  mapped_volumes: {}
+  mapped_volumes: []
   additional_packages: ["huggingface_hub", "diffusers", "transformers", "accelerate", "soundfile", "datasets", "sentencepiece", "requests", "bitsandbytes"]
   
