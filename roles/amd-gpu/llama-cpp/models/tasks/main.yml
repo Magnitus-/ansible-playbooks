@@ -5,7 +5,7 @@
     update_cache: yes
   become: true
 
-- name: Create llama.cpp Models
+- name: Create llama.cpp models directory
   ansible.builtin.file:
     path: "{{ llama_cpp.dest_models_dir | default('/opt/llama.cpp/models') }}"
     state: directory

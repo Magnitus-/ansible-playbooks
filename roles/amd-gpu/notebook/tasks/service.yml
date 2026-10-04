@@ -1,0 +1,61 @@
+- name: Ensure target directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - /etc/notebook
+    - /etc/notebook/entrypoint
+    - /etc/notebook/tls
+
+- name: Generate entrypoint
+  ansible.builtin.template:
+    src: entrypoint.sh.j2
+    dest: /etc/notebook/entrypoint/entrypoint.sh
+    mode: '0755'
+  register: notebook_entrypoint_generate_result
+
+- name: Generate systemd service unit
+  ansible.builtin.template:
+    src: notebook.service.j2
+    dest: /etc/systemd/system/notebook.service
+    mode: '0644'
+  register: notebook_systemd_unit_generate_result
+
+- name: Copy TLS server certificate
+  ansible.builtin.copy:
+    src: "{{ notebook.tls.server_cert }}"
+    dest: /etc/notebook/tls/server.crt
+    mode: '0600'
+  register: notebook_tls_server_cert_copy_result
+
+- name: Copy TLS server private key
+  ansible.builtin.copy:
+    src: "{{ notebook.tls.server_key }}"
+    dest: /etc/notebook/tls/server.key
+    mode: '0600'
+  register: notebook_tls_server_key_copy_result
+
+- name: Generate Jupyter token environment file
+  ansible.builtin.copy:
+    dest: /etc/notebook/jupyter_token_env
+    content: "JUPYTER_TOKEN={{ lookup('file', notebook.jupyter_token) | trim }}"
+    mode: '0600'
+  register: jupyter_env_file_generate_result
+
+- name: Adjust notebook service State
+  vars:
+    service_enabled: "{{ notebook.enabled | default(false) | bool }}"
+    service_changed: >-
+      {{
+        (notebook_entrypoint_generate_result.changed | default(false)) or
+        (notebook_systemd_unit_generate_result.changed | default(false)) or
+        (notebook_tls_server_cert_copy_result.changed | default(false)) or
+        (notebook_tls_server_key_copy_result.changed | default(false)) or
+        (jupyter_env_file_generate_result.changed | default(false))
+      }}
+  ansible.builtin.systemd:
+    name: notebook.service
+    enabled: "{{ service_enabled }}"
+    daemon_reload: "{{ notebook_systemd_unit_generate_result.changed | default(false) }}"
+    state: "{{ 'stopped' if not service_enabled else ('restarted' if service_changed else 'started') }}"

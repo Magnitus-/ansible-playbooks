@@ -4,29 +4,34 @@
     dest: /usr/local/bin/llama_cpp_server.sh
     mode: 0755
   register: server_script_copy_result
+
 - name: Generate Llama.cpp Server Systemd Unit
   template:
     src: llama_cpp_server.service.j2
     dest: /etc/systemd/system/llama_cpp_server.service
     mode: 0644
   register: server_systemd_unit_template_result
+
 - name: Create Llama.cpp Server Config Directory
   ansible.builtin.file:
     path: /etc/llama.cpp/server
     mode: '0550'
     state: directory
+
 - name: Create Llama.cpp Server Tls Directory
   ansible.builtin.file:
     path: /etc/llama.cpp/server/tls
     mode: '0550'
     state: directory
   when: llama_cpp.baremetal.server.tls is defined
+
 - name: Copy Llama.cpp Server Cert
   ansible.builtin.copy:
     src: "{{ llama_cpp.baremetal.server.tls.server_cert }}"
     dest: /etc/llama.cpp/server/tls/server.crt
     mode: 0640
   register: server_cert_copy_result
+
   when: llama_cpp.baremetal.server.tls.server_cert is defined
 - name: Copy Llama.cpp Server Key
   ansible.builtin.copy:
@@ -35,6 +40,7 @@
     mode: 0640
   register: server_key_copy_result
   when: llama_cpp.baremetal.server.tls.server_key is defined
+
 - name: Copy Llama.cpp Server Ca
   ansible.builtin.copy:
     src: "{{ llama_cpp.baremetal.server.tls.ca_cert }}"
@@ -42,6 +48,7 @@
     mode: 0640
   register: server_ca_copy_result
   when: llama_cpp.baremetal.server.tls.ca_cert is defined
+
 - name: Copy Llama.cpp Server Api Keys
   ansible.builtin.copy:
     src: "{{ llama_cpp.baremetal.server.api_keys }}"
@@ -49,6 +56,7 @@
     mode: 0640
   register: server_api_keys_copy_result
   when: llama_cpp.baremetal.server.api_keys is defined
+
 - name: Adjust llama.cpp service State
   vars:
     service_enabled: "{{ llama_cpp.server.enabled | default(true) | bool }}"

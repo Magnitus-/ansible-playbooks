@@ -1,0 +1,40 @@
+- name: Check if notebook image exists
+  ansible.builtin.shell: |
+    nerdctl images -f "reference={{ notebook.image_name }}" -q
+  register: notebook_image_check
+  changed_when: false
+  failed_when: false
+
+- name: Set fact if  notebook  image exists
+  ansible.builtin.set_fact:
+    notebook_image_exists: "{{ notebook_image_check.stdout | trim | length > 0 }}"
+
+- name: Create notebook image build directory
+  ansible.builtin.file:
+    path: /opt/notebook-build
+    state: directory
+    mode: '0755'
+    owner: "{{ ansible_user_id }}"
+  become: true
+  when: not notebook_image_exists
+
+- name: Generate notebooks dockerfile
+  template:
+    src: Dockerfile.j2
+    dest: /opt/notebook-build/Dockerfile
+    owner: root
+    group: root
+    mode: 0640
+  become: true
+  when: not notebook_image_exists
+
+- name: Build notebooks image
+  ansible.builtin.shell: nerdctl build -t "{{ notebook.image_name }}" /opt/notebook-build
+  become: true
+  when: not notebook_image_exists
+  register: notebook_image_build_result
+
+- name: Output notebook image build
+  ansible.builtin.debug:
+    var: notebook_image_build_result.stdout
+  when: not notebook_image_exists

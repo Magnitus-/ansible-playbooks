@@ -1,0 +1,12 @@
+FROM ghcr.io/astral-sh/uv:python3.14-trixie-slim AS uv
+
+FROM rocm/pytorch:rocm7.14_ubuntu26.04_py3.14_pytorch_release_2.12.0
+
+COPY --from=uv /usr/local/bin/uv /usr/local/bin/uv
+RUN ln -s /usr/local/bin/uv /usr/local/bin/uvx
+
+RUN apt-get update && apt-get install -y ffmpeg
+
+{% if notebook.additional_packages | length > 0 %}
+RUN uv pip install {{ notebook.additional_packages | join(' ') }}
+{% endif %}
