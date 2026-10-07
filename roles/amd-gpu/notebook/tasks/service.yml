@@ -51,6 +51,15 @@
     content: "JUPYTER_TOKEN={{ lookup('file', notebook.jupyter_token) | trim }}"
     mode: '0600'
   register: jupyter_env_file_generate_result
+  when: notebook.jupyter_token is defined
+
+- name: Generate Hugging Face token environment file
+  ansible.builtin.copy:
+    dest: /etc/notebook/hf_token_env
+    content: "HF_TOKEN={{ lookup('file', notebook.hf_token) | trim }}"
+    mode: '0600'
+  register: hf_env_file_generate_result
+  when: notebook.hf_token is defined
 
 - name: Adjust notebook service State
   vars:
@@ -61,7 +70,9 @@
         (notebook_systemd_unit_generate_result.changed | default(false)) or
         (notebook_tls_server_cert_copy_result.changed | default(false)) or
         (notebook_tls_server_key_copy_result.changed | default(false)) or
-        (jupyter_env_file_generate_result.changed | default(false))
+        (jupyter_env_file_generate_result.changed | default(false)) or
+        (hf_env_file_generate_result.changed | default(false)) or
+        (notebook_image_changed is defined and notebook_image_changed)
       }}
   ansible.builtin.systemd:
     name: notebook.service

@@ -16,4 +16,6 @@
     - role: ../roles/amd-gpu/llama-cpp/bare-metal/server
       become: true
       when: llama_cpp.baremetal.server is defined
-  
+    - role: ../roles/amd-gpu/notebook
+      become: true
+      when: notebook is defined

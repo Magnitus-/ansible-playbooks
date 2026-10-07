@@ -59,7 +59,7 @@
 
 - name: Adjust llama.cpp service State
   vars:
-    service_enabled: "{{ llama_cpp.server.enabled | default(true) | bool }}"
+    service_enabled: "{{ llama_cpp.baremetal.server.enabled | default(true) | bool }}"
     service_changed: >-
       {{
         (server_script_copy_result.changed | default(false)) or

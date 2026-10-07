@@ -24,3 +24,17 @@ all:
               server_cert: /home/jim/gpu-server-secrets/server.crt
               ca_cert: /home/jim/gpu-server-secrets/ca.crt
             api_keys: /home/jim/gpu-server-secrets/api_keys
+      notebook:
+        enabled: false
+        main_port: 8000
+        additional_ports: "7860-7870"
+        image_name: "local-uv-amd:v1"
+        mapped_volumes:
+          - host_dir: "/var/lib/notebook/workdir"
+            container_dir: "/opt/workdir"
+        additional_packages: ["huggingface_hub", "diffusers", "transformers", "accelerate", "soundfile", "datasets", "sentencepiece", "requests", "bitsandbytes"]
+        tls:
+          server_cert: /home/jim/gpu-server-secrets/server.crt
+          server_key: /home/jim/gpu-server-secrets/server.key
+        jupyter_token: /home/jim/gpu-server-secrets/api_keys
+        hf_token: /home/jim/gpu-server-secrets/hf_token
