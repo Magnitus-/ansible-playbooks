@@ -29,7 +29,7 @@ fi
 
 MODELS_PRESET=""
 if [ ! -z "$SERVER_MODELS_PRESET" ]; then
-    MODELS_PRESET="--api-key-file $SERVER_MODELS_PRESET"
+    MODELS_PRESET="----models-preset $SERVER_MODELS_PRESET"
 fi
 
 exec $SERVER_BINARY \
