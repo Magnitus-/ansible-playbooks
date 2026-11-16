@@ -40,5 +40,6 @@ $MAX_MODELS \
 $TLS_CERT \
 $TLS_KEY \
 $API_KEYS \
+$MODELS_PRESET \
 --host 0.0.0.0 \
 --port $SERVER_PORT
