@@ -24,6 +24,7 @@ all:
               server_cert: /home/jim/gpu-server-secrets/server.crt
               ca_cert: /home/jim/gpu-server-secrets/ca.crt
             api_keys: /home/jim/gpu-server-secrets/api_keys
+            models_preset: /home/jim/gpu-server-conf/models.ini
       notebook:
         enabled: false
         main_port: 8000

@@ -27,6 +27,11 @@ if [ ! -z "$SERVER_API_KEYS" ]; then
     API_KEYS="--api-key-file $SERVER_API_KEYS"
 fi
 
+MODELS_PRESET=""
+if [ ! -z "$SERVER_MODELS_PRESET" ]; then
+    MODELS_PRESET="--api-key-file $SERVER_MODELS_PRESET"
+fi
+
 exec $SERVER_BINARY \
 --split-mode layer \
 $TENSOR_SPLIT \

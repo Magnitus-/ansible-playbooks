@@ -57,6 +57,14 @@
   register: server_api_keys_copy_result
   when: llama_cpp.baremetal.server.api_keys is defined
 
+- name: Copy Models Preset Config
+  ansible.builtin.copy:
+    src: "{{ llama_cpp.baremetal.server.models_preset }}"
+    dest: /etc/llama.cpp/server/models.ini
+    mode: 0640
+  register: server_models_preset_copy_result
+  when: llama_cpp.baremetal.server.models_preset is defined
+
 - name: Adjust llama.cpp service State
   vars:
     service_enabled: "{{ llama_cpp.baremetal.server.enabled | default(true) | bool }}"
@@ -66,7 +74,8 @@
         (server_systemd_unit_template_result.changed | default(false)) or
         (server_cert_copy_result.changed | default(false)) or
         (server_key_copy_result.changed | default(false)) or
-        (server_api_keys_copy_result.changed | default(false))
+        (server_api_keys_copy_result.changed | default(false)) or
+        (server_models_preset_copy_result.changed | default(false))
       }}
   ansible.builtin.systemd:
     name: llama_cpp_server.service

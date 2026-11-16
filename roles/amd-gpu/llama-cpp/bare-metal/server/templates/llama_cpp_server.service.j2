@@ -14,6 +14,9 @@ Environment="SERVER_COMPUTE_BACKEND={{ llama_cpp.baremetal.server.compute_backen
 {% if llama_cpp.baremetal.server.max_models is defined %}
 Environment="SERVER_MAX_MODELS={{ llama_cpp.baremetal.server.max_models }}"
 {% endif %}
+{% if llama_cpp.baremetal.server.models_preset is defined %}
+Environment="SERVER_MODELS_PRESET=/etc/llama.cpp/server/models.ini"
+{% endif %}
 {% if llama_cpp.baremetal.server.tensor_split is defined and llama_cpp.baremetal.server.tensor_split | length > 0 %}
 Environment="SERVER_TENSOR_SPLIT={{ llama_cpp.baremetal.server.tensor_split | join(',') }}"
 {% endif %}
